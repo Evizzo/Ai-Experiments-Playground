@@ -14,7 +14,8 @@ Run generateEmbeddings.py
 Use queryGraphWithEmbedding.py to test
 
 ===========================================
-run createEmbedingsGraphsMetadataRelationships.py
+
+run createEmbeddingsGraphsMetadataRelationships.py
 
 CREATE INDEX FOR (b:Book) ON (b.title);
 CREATE INDEX FOR (c:Chapter) ON (c.number);
