@@ -1,0 +1,170 @@
+Logging results to compareSearches/logs-20250507_200310/results.txt
+
+
+=== Question: Who is the Doctor? ===
+
+-- Vector-only Retrieval --
+1. (0.635) The Doctor stood in front of the TARDIS, staring into the distance. Time and space had no boundaries.
+2. (0.592) The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+3. (0.579) Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+4. (0.563) Unit was prepared to battle the Zygons, but the Doctor's plan was far more complicated than they could comprehend.
+5. (0.510) The TARDIS was more than a ship; it was a way of life. It could travel anywhere and everywhere.
+Answer: The Doctor is a time-traveling individual who uses the TARDIS to navigate
+ time and space. He is faced with difficult decisions, such as saving or destroying Gallifrey, and stopping Zygon invasions on Earth.
+  He relies on old friends and Unit for help, but his plans are often complex.
+
+-- Graph-only Retrieval --
+1. The Doctor stood in front of the TARDIS, staring into the distance. Time and space had no boundaries.
+2. Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+3. Unit was prepared to battle the Zygons, but the Doctor's plan was far more complicated than they could comprehend.
+4. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+Answer: The Doctor is a time-traveling alien who can stop the Zygons and has to decide the fate of Gallifrey.
+
+-- Hybrid Retrieval --
+V1. (0.635) The Doctor stood in front of the TARDIS, staring into the distance. Time and space had no boundaries.
+V2. (0.592) The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+V3. (0.579) Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+V4. (0.563) Unit was prepared to battle the Zygons, but the Doctor's plan was far more complicated than they could comprehend.
+V5. (0.510) The TARDIS was more than a ship; it was a way of life. It could travel anywhere and everywhere.
+G1. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+G2. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+G3. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+G4. Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+G5. Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+Answer: The answer is implicitly defined within the context. The Doctor is:
+
+*   A Time Lord (or at least associated with them and Gallifrey)
+*   Someone who travels through time and space in the TARDIS
+*   Someone who battles threats to Earth, like the Zygons
+*   Someone who works with Unit
+*   Someone who makes difficult decisions with galaxy-wide consequences.
+=============
+
+
+=== Question: What is the TARDIS? ===
+
+-- Vector-only Retrieval --
+1. (0.694) The TARDIS was more than a ship; it was a way of life. It could travel anywhere and everywhere.
+2. (0.670) The Doctor stood in front of the TARDIS, staring into the distance. Time and space had no boundaries.
+3. (0.561) The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+4. (0.517) Unit was prepared to battle the Zygons, but the Doctor's plan was far more complicated than they could comprehend.
+5. (0.509) Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+Answer: A ship and a way of life that can travel anywhere and everywhere.
+
+-- Graph-only Retrieval --
+1. The Doctor stood in front of the TARDIS, staring into the distance. Time and space had no boundaries.
+2. The TARDIS was more than a ship; it was a way of life. It could travel anywhere and everywhere.
+Answer: A ship that can travel anywhere and everywhere, and a way of life.
+
+-- Hybrid Retrieval --
+V1. (0.694) The TARDIS was more than a ship; it was a way of life. It could travel anywhere and everywhere.
+V2. (0.670) The Doctor stood in front of the TARDIS, staring into the distance. Time and space had no boundaries.
+V3. (0.561) The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+V4. (0.517) Unit was prepared to battle the Zygons, but the Doctor's plan was far more complicated than they could comprehend.
+V5. (0.509) Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+G1. Unit was prepared to battle the Zygons, but the Doctor's plan was far more complicated than they could comprehend.
+G2. Unit was prepared to battle the Zygons, but the Doctor's plan was far more complicated than they could comprehend.
+G3. The TARDIS was more than a ship; it was a way of life. It could travel anywhere and everywhere.
+G4. The TARDIS was more than a ship; it was a way of life. It could travel anywhere and everywhere.
+G5. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+Answer: A ship that can travel anywhere and everywhere; a way of life.
+=============
+
+
+=== Question: What decision did the Doctor face? ===
+
+-- Vector-only Retrieval --
+1. (0.666) The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+2. (0.659) The Doctor stood in front of the TARDIS, staring into the distance. Time and space had no boundaries.
+3. (0.649) Unit was prepared to battle the Zygons, but the Doctor's plan was far more complicated than they could comprehend.
+4. (0.583) Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+5. (0.519) The TARDIS was more than a ship; it was a way of life. It could travel anywhere and everywhere.
+Answer: The Doctor faced the decision to save Gallifrey or destroy it.
+
+-- Graph-only Retrieval --
+Answer: Okay, I need more context to answer the question "What decision did the Doctor face?".  Please provide some keywords or a brief summary of the situation involving the Doctor. For example:
+
+*   **Doctor Who, Daleks, Earth**
+*   **Doctor, regeneration, new body**
+*   **Doctor, companion, danger**
+
+The more information you give me, the better I can answer your question.
+
+-- Hybrid Retrieval --
+V1. (0.666) The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+V2. (0.659) The Doctor stood in front of the TARDIS, staring into the distance. Time and space had no boundaries.
+V3. (0.649) Unit was prepared to battle the Zygons, but the Doctor's plan was far more complicated than they could comprehend.
+V4. (0.583) Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+V5. (0.519) The TARDIS was more than a ship; it was a way of life. It could travel anywhere and everywhere.
+G1. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+G2. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+G3. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+G4. Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+G5. Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+Answer: The Doctor faced the decision of whether to save Gallifrey or destroy it.
+=============
+
+
+=== Question: Describe the Zygon invasion. ===
+
+-- Vector-only Retrieval --
+1. (0.634) Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+2. (0.608) Unit was prepared to battle the Zygons, but the Doctor's plan was far more complicated than they could comprehend.
+3. (0.542) The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+4. (0.504) The TARDIS was more than a ship; it was a way of life. It could travel anywhere and everywhere.
+5. (0.458) The Doctor stood in front of the TARDIS, staring into the distance. Time and space had no boundaries.
+Answer: The Zygons had invaded Earth once more.
+
+-- Graph-only Retrieval --
+Answer: The Zygon invasion, a recurring threat in the Doctor Who universe, typically involves the Zygons, a race of shapeshifting aliens, infiltrating Earth society by replacing key individuals. They maintain their true form within specialized pods or stasis chambers, often hidden in plain sight. The invasion is usually subtle, with Zygons mimicking humans to gain positions of power and influence, destabilizing society from within. Their ultimate goal is often to terraform Earth into a more Zygon-friendly environment, potentially at the expense of humanity. The Doctor and his companions are usually the only ones who can uncover the deception and stop the Zygons before their plans come to fruition. The invasion often involves a complex web of paranoia, mistrust, and the challenge of identifying who is truly human and who is a Zygon imposter.
+
+-- Hybrid Retrieval --
+V1. (0.634) Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+V2. (0.608) Unit was prepared to battle the Zygons, but the Doctor's plan was far more complicated than they could comprehend.
+V3. (0.542) The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+V4. (0.504) The TARDIS was more than a ship; it was a way of life. It could travel anywhere and everywhere.
+V5. (0.458) The Doctor stood in front of the TARDIS, staring into the distance. Time and space had no boundaries.
+G1. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+G2. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+G3. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+G4. Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+G5. Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+Answer: The Zygon invasion was a subtle, insidious creep. It wasn't a frontal assault of spaceships and laser fire, but a slow, creeping replacement. The Zygons, masters of mimicry, had infiltrated every level of society. They weren't just soldiers; they were politicians, teachers, police officers, even friends and family.
+
+Their true forms, grotesque and orange, were hidden beneath perfect human disguises, maintained by advanced technology and a chilling lack of empathy. They moved amongst humanity, observing, learning, and subtly manipulating events to their advantage.
+
+The invasion wasn't about conquest in the traditional sense. It was about assimilation. The Zygons sought to replace humanity, to make Earth their new home, a planet populated by Zygons wearing human faces. They exploited human weaknesses, sowing discord and distrust, making it easier to slip into the cracks and take control.
+
+Unit, ever vigilant, had detected anomalies, strange energy signatures and behavioral inconsistencies. They were prepared for a fight, for a conventional war. But the Zygons weren't playing by those rules. They were already inside, a silent, invisible enemy, waiting for the opportune moment to fully reveal their presence and claim Earth as their own. The invasion was a slow burn, a chilling realization that the person standing next to you might not be who they seemed, and that the world you knew was slowly, irrevocably changing.
+=============
+
+
+=== Question: How does the Doctor travel through time? ===
+
+-- Vector-only Retrieval --
+1. (0.666) The Doctor stood in front of the TARDIS, staring into the distance. Time and space had no boundaries.
+2. (0.657) The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+3. (0.594) Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+4. (0.593) The TARDIS was more than a ship; it was a way of life. It could travel anywhere and everywhere.
+5. (0.570) Unit was prepared to battle the Zygons, but the Doctor's plan was far more complicated than they could comprehend.
+Answer: The Doctor travels through time using the TARDIS.
+
+-- Graph-only Retrieval --
+1. The Doctor stood in front of the TARDIS, staring into the distance. Time and space had no boundaries.
+2. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+Answer: This context doesn't explicitly state *how* the Doctor travels through time. It only mentions the TARDIS and the boundless nature of time and space. To answer how the Doctor travels through time, you'd need more information about the TARDIS and its capabilities.
+
+-- Hybrid Retrieval --
+V1. (0.666) The Doctor stood in front of the TARDIS, staring into the distance. Time and space had no boundaries.
+V2. (0.657) The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+V3. (0.594) Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+V4. (0.593) The TARDIS was more than a ship; it was a way of life. It could travel anywhere and everywhere.
+V5. (0.570) Unit was prepared to battle the Zygons, but the Doctor's plan was far more complicated than they could comprehend.
+G1. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+G2. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+G3. The Time Lords were returning, and the Doctor had to make the ultimate decision: to save Gallifrey or destroy it.
+G4. Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+G5. Zygons had invaded Earth once more, and only the Doctor could stop them. He needed help from old friends.
+Answer: The Doctor travels through time using the TARDIS.
+=============
+
