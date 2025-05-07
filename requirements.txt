@@ -1,0 +1,14 @@
+neo4j~=5.28.1
+pandas
+numpy
+openai
+langchain
+tiktoken
+spacy
+nltk
+python-dotenv~=1.1.0
+sentence-transformers~=4.0.2
+scikit-learn
+
+dotenv~=0.9.9
+langchain-google-genai~=2.1.2
