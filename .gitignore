@@ -1,3 +1,4 @@
 .env
 .gitignore
 .idea
+./neo4j/__pycache__
