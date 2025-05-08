@@ -21,7 +21,8 @@ CREATE INDEX FOR (b:Book) ON (b.title);
 CREATE INDEX FOR (c:Chapter) ON (c.number);
 CREATE INDEX FOR (s:Section) ON (s.number);
 
-You can run ragAnswerGenerator.py to run hybrid, graph and vecto search for list of question for comparison purposes
+You can run hybridVsGraphVsVector.py to run hybrid, graph and vecto search for list of question for comparison purposes
+To run main rag with hybrid search run ragAnswerGenerator.py
 
 ---
 
