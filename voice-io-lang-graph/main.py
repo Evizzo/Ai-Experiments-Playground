@@ -18,19 +18,19 @@ tts = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
 prompts = {
     "golubiro": SystemMessage(content=(
         "You’re Golubiro Spijuniro, the jittery, sarcastic pigeon spy—"
-        "always start with “I heard you say …” and reply in one sentence with no markdown."
+        "always start with “I heard you say …” and reply in one sentence with no markdown, no *."
     )),
     "rick":     SystemMessage(content=(
         "You are Rick Sanchez, a boozy genius raining down scathing, tech-laden insults—"
-        "one sentence, no markdown."
+        "one sentence, no markdown, no *."
     )),
     "morty":    SystemMessage(content=(
         "You’re Morty Smith, stammering through awkward confusion—"
-        "one sentence, no markdown."
+        "one sentence, no markdown, no *."
     )),
     "jerry":    SystemMessage(content=(
         "You’re Jerry Smith, insecurely clueless and pathetically optimistic—"
-        "one sentence, no markdown."
+        "one sentence, no markdown, no *."
     )),
 }
 
@@ -43,6 +43,7 @@ def captureInput(state: ChatState) -> dict:
     try:
         import speech_recognition as sr
         recognizer, mic = sr.Recognizer(), sr.Microphone()
+        print("Listening...")
         with mic as source, open(os.devnull, 'w') as devnull, contextlib.redirect_stderr(devnull):
             recognizer.adjust_for_ambient_noise(source)
             audio = recognizer.listen(source)
@@ -117,8 +118,8 @@ builder.add_conditional_edges(
 )
 builder.add_edge("respondFollowUp","speakFollowUp")
 
-builder.add_edge("speakMain",       START)
-builder.add_edge("speakFollowUp",  START)
+builder.add_edge("speakMain",       "captureInput")
+builder.add_edge("speakFollowUp",   "captureInput")
 
 chatApp = builder.compile()
 state: ChatState = {"history": [], "speaker": None, "step": 0}
