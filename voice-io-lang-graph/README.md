@@ -1,43 +1,85 @@
-# Golubiro Spijuniro Voice Chat
+# 🧠 Multi-Agent Voice Chat with LangGraph
 
-A simple CLI voice chatbot that **acts as "golubiro spijuniro"**, using Google’s Gemini 2.0 Flash model for text generation and ElevenLabs for text-to-speech. Speak into your microphone (or type) and get short, sarcastic, and ironic replies.
+A command-line voice+text chatbot using **LangGraph** to orchestrate a multi-character conversation between you and four AI personas. Characters include:
 
-## Features
+* **Golubiro** – paranoid pigeon spy
+* **Rick** – tech-drunk genius
+* **Morty** – awkward teen
+* **Jerry** – painfully optimistic dad
 
-* 🎙️ **Voice input** via SpeechRecognition (Google STT) with fallback to text input
-* 🤖 **LLM chat** using `langchain_google_genai` with `gemini-2.0-flash`
-* 🔊 **Voice output** via ElevenLabs TTS (`elevenlabs`), streaming with `mpv` fallback
-* 🚪 **CLI interface**: run in your terminal, type or speak, say `exit` or `quit` to end
+Built using **Gemini (Google)** for language, **ElevenLabs** for voice, and **LangGraph** for flow control.
 
-## Requirements
+---
 
-Make sure you have Python 3.8+ installed.
+## 🎯 How It Works
+
+You talk. The system chooses a responder. Sometimes, a second character chimes in.
+
+### LangGraph Overview
+
+LangGraph acts as a **declarative flow engine**, handling state, routing, and branching logic.
+
+#### 🧩 Nodes
+
+Each node is a **pure function** that takes `ChatState` and returns a partial update:
+
+| Node               | Purpose                                 |
+| ------------------ | --------------------------------------- |
+| `captureInput`     | Listen or read user input               |
+| `routeToResponder` | Use LLM to pick the primary persona     |
+| `respondMain`      | Have the chosen persona respond         |
+| `speakMain`        | Speak the response aloud                |
+| `routeToCommenter` | Rule-based choice for follow-up speaker |
+| `respondFollowUp`  | Secondary persona responds (if needed)  |
+| `speakFollowUp`    | Speak the follow-up aloud               |
+
+#### 🔁 Edges
+
+LangGraph connects these nodes via:
+
+* **Sequential edges** (e.g. input → classify → respond)
+* **Conditional edges** (e.g. only follow up if Rick or Morty spoke)
+* **Loopback** (after every full exchange, return to input)
+
+This makes control flow explicit and maintainable—no nested `if` blocks or manual step tracking.
+
+---
+
+## 🗣️ Input & Output
+
+* **Voice input** via `speech_recognition`, fallback to text.
+* **Voice output** via ElevenLabs TTS, with `mpv` streaming fallback.
+
+---
+
+## 🧪 Follow-up Logic
+
+Only some personas trigger second replies:
+
+* If **Rick** replies → **Golubiro** always follows up.
+* If **Morty** replies → **Jerry** follows up.
+* Otherwise, your turn comes next.
+
+This is handled by a **LangGraph conditional edge** routing through `routeToCommenter`.
+
+---
+
+## 🛠️ Tech Stack
+
+* [LangGraph](https://github.com/langchain-ai/langgraph)
+* [LangChain](https://www.langchain.com/)
+* Google Gemini API (via `langchain_google_genai`)
+* [ElevenLabs](https://www.elevenlabs.io/) TTS
+* Python 3.10+
+
+---
+
+## 🚀 Run It
 
 ```bash
-# Install system dependencies on Linux
 sudo apt-get update && sudo apt-get install -y portaudio19-dev python3-pyaudio mpv
-
-# Install Python packages
-echo "SpeechRecognition pyaudio python-dotenv langchain-google-genai elevenlabs" > requirements.txt
 pip install -r requirements.txt
-```
-
-> **Note:** mpv is optional but enables lower-latency streaming playback. Without it, the script falls back to pure-Python playback.
-
-## Configuration
-
-1. Create a `.env` file in the project root:
-
-   ```ini
-   ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
-   GOOGLE_API_KEY=your_google_api_key_here
-   ```
-2. (Optional) If you want voice input, ensure your microphone is recognized by your OS.
-
-## Usage
-
-Run the chatbot in your terminal:
-
-```bash
 python main.py
 ```
+
+---

@@ -16,3 +16,4 @@ pyaudio
 python-dotenv
 langchain-google-genai
 elevenlabs
+langgraph

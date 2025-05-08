@@ -24,14 +24,18 @@ It ingests structured “Doctor Who” data into a `Book → Chapter → Section
 
 ---
 
-### 📁 **golubiro** – Voice-driven “Golubiro Spijuniro” Chatbot
+### 📁 **voice-io-lang-graph** – Multi-Agent Voice Chat with LangGraph, Gemini & ElevenLabs
 
-🎙️ A minimalist CLI voice chatbot that **acts as “Golubiro Spijuniro”**, listening via your mic (or text), echoing back with “I heard you say …” in short, punchy replies.
+🗣️ A voice-enabled chat experience where you interact with four distinct AI personas—**Rick**, **Morty**, **Jerry**, and **Golubiro the paranoid pigeon spy**. Powered by **Google Gemini** for responses and **ElevenLabs** for real-time TTS output.
 
-🧰 **Tech**: Python, SpeechRecognition, Gemini 2.0 Flash (via langchain\_google\_genai), ElevenLabs TTS
+🧠 Built with **LangGraph** to declaratively orchestrate conversation turns:
 
-📄 **Script**:
+1. You speak (via microphone or text).
+2. LangGraph routes your message to the most relevant character.
+3. That character responds.
+4. Optionally, a second persona reacts to the reply (e.g. Golubiro always comments after Rick).
+5. Loop back to your next input.
 
-* `main.py` — single file CLI; run with `python main.py`; say “exit” to quit.
+🧰 Tech used: LangGraph, LangChain, Google Gemini (via `langchain_google_genai`), ElevenLabs TTS, `speech_recognition`, Python 3.10+
 
 ---
