@@ -5,6 +5,8 @@
 
 ## 📂 Projects
 
+---
+
 ### 📁 **neo4j** – Hybrid Graph + Embedding RAG Demo
 
 🚀 A proof-of-concept that blends **Neo4j graph relationships** and **vector search** to power a Retrieval-Augmented Generation (RAG) system using **Google Gemini**.
