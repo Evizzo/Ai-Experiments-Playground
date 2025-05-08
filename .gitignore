@@ -3,4 +3,4 @@ neo4j/.env
 .idea
 __pycache__/
 *.py[cod]
-neo4j/compareSearches
+neo4j/compareSearches.idea/
