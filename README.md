@@ -23,3 +23,15 @@ It ingests structured “Doctor Who” data into a `Book → Chapter → Section
 * `ragAnswerGenerator.py` – RAG via LangChain & Gemini
 
 ---
+
+### 📁 **golubiro** – Voice-driven “Golubiro Spijuniro” Chatbot
+
+🎙️ A minimalist CLI voice chatbot that **acts as “Golubiro Spijuniro”**, listening via your mic (or text), echoing back with “I heard you say …” in short, punchy replies.
+
+🧰 **Tech**: Python, SpeechRecognition, Gemini 2.0 Flash (via langchain\_google\_genai), ElevenLabs TTS
+
+📄 **Script**:
+
+* `main.py` — single file CLI; run with `python main.py`; say “exit” to quit.
+
+---
