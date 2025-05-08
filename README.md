@@ -1,5 +1,3 @@
----
-
 # 🧠 AI-Experiments
 
 > A playground for building and testing ideas with AI
