@@ -3,8 +3,6 @@
 > A playground for building and testing ideas with AI
 > Each project lives in its own folder with all details inside.
 
----
-
 ## 📂 Projects
 
 ### 📁 **neo4j** – Hybrid Graph + Embedding RAG Demo
