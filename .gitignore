@@ -4,3 +4,4 @@ neo4j/.env
 __pycache__/
 *.py[cod]
 neo4j/compareSearches.idea/
+voice-io-lang-graph/.env
