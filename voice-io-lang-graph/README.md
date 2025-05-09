@@ -1,76 +1,63 @@
 # 🧠 Multi-Agent Voice Chat with LangGraph
 
-A command-line voice+text chatbot using **LangGraph** to orchestrate a multi-character conversation between you and four AI personas. Characters include:
+A command-line voice+text chatbot powered by **LangGraph**, orchestrating conversations between you and four chaotic personas:
 
-* **Golubiro** – paranoid pigeon spy
-* **Rick** – tech-drunk genius
-* **Morty** – awkward teen
-* **Jerry** – painfully optimistic dad
+* **Golubiro** – paranoid government drone disguised as a pigeon  
+* **Rick** – drunken tech-savant spewing genius and sarcasm  
+* **Morty** – confused teen stumbling through replies  
+* **Jerry** – painfully clueless, always trying his best
 
-Built using **Gemini (Google)** for language, **ElevenLabs** for voice, and **LangGraph** for flow control.
+Uses **Google Gemini** for brains and **ElevenLabs** for voice.
 
 ---
 
 ## 🎯 How It Works
 
-You talk. The system chooses a responder. Sometimes, a second character chimes in.
+1. You speak (or type).
+2. The system chooses a character to respond based on your message.
+3. Sometimes, a second character follows up (e.g. Golubiro after Rick).
+4. Voices are spoken using ElevenLabs.
 
-### LangGraph Overview
+---
 
-LangGraph acts as a **declarative flow engine**, handling state, routing, and branching logic.
+### 🧩 LangGraph Flow
 
-#### 🧩 Nodes
+#### Nodes (steps)
 
-Each node is a **pure function** that takes `ChatState` and returns a partial update:
+| Node               | Purpose                                         |
+|--------------------|-------------------------------------------------|
+| `captureInput`     | Capture user voice or text                     |
+| `classifySpeaker`  | Use Gemini to pick a character (e.g. Rick)     |
+| `respond`          | Generate a response as that character          |
+| `speak`            | Speak the response aloud                       |
+| `followUpResponder`| Optional second persona chimes in              |
 
-| Node               | Purpose                                 |
-| ------------------ | --------------------------------------- |
-| `captureInput`     | Listen or read user input               |
-| `routeToResponder` | Use LLM to pick the primary persona     |
-| `respondMain`      | Have the chosen persona respond         |
-| `speakMain`        | Speak the response aloud                |
-| `routeToCommenter` | Rule-based choice for follow-up speaker |
-| `respondFollowUp`  | Secondary persona responds (if needed)  |
-| `speakFollowUp`    | Speak the follow-up aloud               |
+#### Conditional Logic
 
-#### 🔁 Edges
+After `speak`, the system checks if follow-up is needed:
 
-LangGraph connects these nodes via:
-
-* **Sequential edges** (e.g. input → classify → respond)
-* **Conditional edges** (e.g. only follow up if Rick or Morty spoke)
-* **Loopback** (after every full exchange, return to input)
-
-This makes control flow explicit and maintainable—no nested `if` blocks or manual step tracking.
+- Rick → Golubiro
+- Morty → Jerry
+- Others → no follow-up
 
 ---
 
 ## 🗣️ Input & Output
 
-* **Voice input** via `speech_recognition`, fallback to text.
-* **Voice output** via ElevenLabs TTS, with `mpv` streaming fallback.
+- **Voice input** via `speech_recognition` (fallback to text)
+- **Voice output** via `ElevenLabs` using `stream()` or `play()`
 
----
-
-## 🧪 Follow-up Logic
-
-Only some personas trigger second replies:
-
-* If **Rick** replies → **Golubiro** always follows up.
-* If **Morty** replies → **Jerry** follows up.
-* Otherwise, your turn comes next.
-
-This is handled by a **LangGraph conditional edge** routing through `routeToCommenter`.
+If ElevenLabs quota is empty, it prints the line instead.
 
 ---
 
 ## 🛠️ Tech Stack
 
-* [LangGraph](https://github.com/langchain-ai/langgraph)
-* [LangChain](https://www.langchain.com/)
-* Google Gemini API (via `langchain_google_genai`)
-* [ElevenLabs](https://www.elevenlabs.io/) TTS
-* Python 3.10+
+- [LangGraph](https://github.com/langchain-ai/langgraph)
+- [LangChain](https://www.langchain.com/)
+- Google Gemini (via `langchain_google_genai`)
+- [ElevenLabs TTS](https://www.elevenlabs.io/)
+- Python 3.10+
 
 ---
 
@@ -81,5 +68,3 @@ sudo apt-get update && sudo apt-get install -y portaudio19-dev python3-pyaudio m
 pip install -r requirements.txt
 python main.py
 ```
-
----
