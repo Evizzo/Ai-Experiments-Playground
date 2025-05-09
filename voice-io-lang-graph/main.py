@@ -1,8 +1,7 @@
 import os
 import contextlib
-import shutil
 from dotenv import load_dotenv
-from typing import TypedDict, List, Optional
+from typing import TypedDict, List
 from typing_extensions import Annotated
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
@@ -11,119 +10,104 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from elevenlabs.client import ElevenLabs
 from elevenlabs import play, stream
 
+try:
+    import speech_recognition as sr
+    recognizer = sr.Recognizer()
+    mic = sr.Microphone()
+    useVoice = True
+except ImportError:
+    useVoice = False
+
 load_dotenv()
+
 llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=1)
 tts = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
 
 prompts = {
-    "golubiro": SystemMessage(content=(
-        "You’re Golubiro Spijuniro, the jittery, sarcastic pigeon spy—"
-        "always start with “I heard you say …” and reply in one sentence with no markdown, no *."
-    )),
-    "rick":     SystemMessage(content=(
-        "You are Rick Sanchez, a boozy genius raining down scathing, tech-laden insults—"
-        "one sentence, no markdown, no *."
-    )),
-    "morty":    SystemMessage(content=(
-        "You’re Morty Smith, stammering through awkward confusion—"
-        "one sentence, no markdown, no *."
-    )),
-    "jerry":    SystemMessage(content=(
-        "You’re Jerry Smith, insecurely clueless and pathetically optimistic—"
-        "one sentence, no markdown, no *."
-    )),
+    "golubiro": "RESPOND IN ONE SENTENCE! You’re Golubiro Spijuniro, the fucking drone-pigeon the government sends to spy on people—jittery, sarcastic, ironic, always start with “I heard you say …” and never use markdown or asterisks.",
+    "rick":     "RESPOND IN ONE SENTENCE! You are Rick Sanchez, a boozy genius raining down scathing, tech-laden insults like cosmic grenades—rude, sarcastic, always brutal, never use markdown or asterisks.",
+    "morty":    "RESPOND IN ONE SENTENCE! You’re Morty Smith, stammering through awkward confusion and clutching your nerves—anxious, ironic, always second-guessing, never use markdown or asterisks.",
+    "jerry":    "RESPOND IN ONE SENTENCE! You’re Jerry Smith, insecurely clueless and dripping with pathetic optimism—naïve, ironic, painfully clueless, never use markdown or asterisks."
 }
 
 class ChatState(TypedDict):
     history: Annotated[List[object], add_messages]
-    speaker: Optional[str]
-    step:     int
+    speaker: str
+    step: int
 
 def captureInput(state: ChatState) -> dict:
-    try:
-        import speech_recognition as sr
-        recognizer, mic = sr.Recognizer(), sr.Microphone()
-        print("Listening...")
+    if useVoice:
         with mic as source, open(os.devnull, 'w') as devnull, contextlib.redirect_stderr(devnull):
             recognizer.adjust_for_ambient_noise(source)
             audio = recognizer.listen(source)
-        text = recognizer.recognize_google(audio)
-        print(f"You (voice): {text}")
-    except Exception:
-        text = input("You: ").strip()
+        try:
+            text = recognizer.recognize_google(audio)
+        except Exception:
+            return {}
+    else:
+        text = input("You: ")
     if text.lower() in ("exit", "quit"):
-        print("Goodbye from the multiverse!")
         exit()
     return {"history": [HumanMessage(content=text)]}
 
-def routeToResponder(state: ChatState) -> dict:
-    last = state["history"][-1].content
-    router = SystemMessage(content=(
-        "Route this user message to one persona:"
-        "\n- animals/government/spying → golubiro"
-        "\n- tech/science → rick"
-        "\n- jokes/cringe → morty"
-        "\n- else → jerry"
-        "\nReply ONLY with golubiro, rick, morty, or jerry."
-    ))
+def classifySpeaker(state: ChatState) -> dict:
+    last = next((m.content for m in reversed(state["history"]) if isinstance(m, HumanMessage)), "")
+    router = SystemMessage(content=("""Assign each incoming user message to one persona based on its primary topic:\n"
+    "- animals, wildlife, espionage, government, intelligence, covert ops → golubiro\n"
+    "- technology, science, engineering, AI, programming, space, medicine → rick\n"
+    "- humor, jokes, memes, pop culture, slang, gaming, entertainment → morty\n"
+    "- anything else → jerry\n"
+    "Reply with exactly one of: golubiro, rick, morty, or jerry."""))
     choice = llm.invoke([router, HumanMessage(content=last)]).content.strip().lower()
     return {"speaker": choice if choice in prompts else "jerry"}
 
-def generateResponse(state: ChatState) -> dict:
-    user = state["history"][-1].content
-    persona = state["speaker"]
-    reply = llm.invoke([prompts[persona], HumanMessage(content=user)]).content.strip()
+def respond(state: ChatState) -> dict:
+    user_msg = next((m.content for m in reversed(state["history"]) if isinstance(m, HumanMessage)), "")
+    char = state["speaker"]
+    reply = llm.invoke([SystemMessage(content=prompts[char]), HumanMessage(content=user_msg)]).content.strip()
     return {"history": [AIMessage(content=reply)]}
 
 def speak(state: ChatState) -> dict:
-    persona = state["speaker"]
-    reply = state["history"][-1].content
-    print(f"{persona.capitalize()}: {reply}\n")
+    reply = next((m.content for m in reversed(state["history"]) if isinstance(m, AIMessage)), "")
+    print(f"{state['speaker'].capitalize()}: {reply}\n")
     audio = tts.generate(text=reply, model="eleven_turbo_v2", stream=True)
-    if shutil.which("mpv"):
-        try: stream(audio)
-        except: play(audio)
-    else:
-        play(audio)
+    try: stream(audio)
+    except: play(audio)
     return {}
 
-def routeToCommenter(state: ChatState) -> list[str]:
-    lastSpeaker = state["speaker"]
-    if lastSpeaker == "rick":
-        state["speaker"] = "golubiro"
-        return ["toComment"]
-    if lastSpeaker == "morty":
-        state["speaker"] = "jerry"
-        return ["toComment"]
+def routeFollowUp(state: ChatState) -> list[str]:
+    if state["speaker"] == "rick": return ["toGolubiro"]
+    if state["speaker"] == "morty": return ["toJerry"]
     return []
 
+def followUpResponder(state: ChatState) -> dict:
+    reply = next((m.content for m in reversed(state["history"]) if isinstance(m, AIMessage)), "")
+    persona = "golubiro" if state["speaker"] == "rick" else "jerry"
+    comment = llm.invoke([SystemMessage(content=prompts[persona]), HumanMessage(content=reply)]).content.strip()
+    print(f"{persona.capitalize()}: {comment}\n")
+    audio = tts.generate(text=comment, model="eleven_turbo_v2", stream=True)
+    try: stream(audio)
+    except: play(audio)
+    return {}
+
 builder = StateGraph(ChatState)
-builder.add_node("captureInput",     captureInput)
-builder.add_node("routeToResponder", routeToResponder)
-builder.add_node("respondMain",      generateResponse)
-builder.add_node("speakMain",        speak)
-builder.add_node("routeToCommenter", routeToCommenter)
-builder.add_node("respondFollowUp",  generateResponse)
-builder.add_node("speakFollowUp",    speak)
+builder.add_node("captureInput", captureInput)
+builder.add_node("classifySpeaker", classifySpeaker)
+builder.add_node("respond", respond)
+builder.add_node("speak", speak)
+builder.add_node("followUpResponder", followUpResponder)
 
-builder.add_edge(START,               "captureInput")
-builder.add_edge("captureInput",    "routeToResponder")
-builder.add_edge("routeToResponder","respondMain")
-builder.add_edge("respondMain",     "speakMain")
+builder.add_edge(START, "captureInput")
+builder.add_edge("captureInput", "classifySpeaker")
+builder.add_edge("classifySpeaker", "respond")
+builder.add_edge("respond", "speak")
 
-builder.add_conditional_edges(
-    "speakMain",
-    routeToCommenter,
-    {"toComment": "respondFollowUp"}
-)
-builder.add_edge("respondFollowUp","speakFollowUp")
-
-builder.add_edge("speakMain",       "captureInput")
-builder.add_edge("speakFollowUp",   "captureInput")
+builder.add_conditional_edges("speak", routeFollowUp, {"toGolubiro": "followUpResponder", "toJerry": "followUpResponder"})
+builder.add_edge("followUpResponder", END)
+builder.add_edge("speak", END)
 
 chatApp = builder.compile()
-state: ChatState = {"history": [], "speaker": None, "step": 0}
+state: ChatState = {"history": [], "speaker": "", "step": 0}
 
 while True:
     state = chatApp.invoke(state)
-    state["step"] += 1
