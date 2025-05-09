@@ -26,16 +26,18 @@ It ingests structured “Doctor Who” data into a `Book → Chapter → Section
 
 ### 📁 **voice-io-lang-graph** – Multi-Agent Voice Chat with LangGraph, Gemini & ElevenLabs
 
-🗣️ A voice-enabled chat experience where you interact with four distinct AI personas—**Rick**, **Morty**, **Jerry**, and **Golubiro the paranoid pigeon spy**. Powered by **Google Gemini** for responses and **ElevenLabs** for real-time TTS output.
+🗣️ A voice-enabled terminal chatbot where you interact with four chaotic AI personas—**Rick**, **Morty**, **Jerry**, and **Golubiro**, a paranoid drone-pigeon spy. 
 
-🧠 Built with **LangGraph** to declaratively orchestrate conversation turns:
+Uses **Google Gemini** for natural language and **ElevenLabs** for speech.
 
-1. You speak (via microphone or text).
-2. LangGraph routes your message to the most relevant character.
-3. That character responds.
-4. Optionally, a second persona reacts to the reply (e.g. Golubiro always comments after Rick).
-5. Loop back to your next input.
+🧠 Orchestrated with **LangGraph** as a declarative state machine:
 
-🧰 Tech used: LangGraph, LangChain, Google Gemini (via `langchain_google_genai`), ElevenLabs TTS, `speech_recognition`, Python 3.10+
+1. You talk (via microphone or type).
+2. LangGraph routes your message to the most relevant character using LLM-based classification.
+3. The character responds.
+4. If the character was Rick or Morty, a follow-up response is triggered by Golubiro or Jerry.
+5. The flow loops back to capture the next input.
+
+🧰 Tech used: LangGraph, LangChain, Google Gemini (`langchain_google_genai`), ElevenLabs TTS, `speech_recognition`, Python 3.10+
 
 ---
