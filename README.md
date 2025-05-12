@@ -1,4 +1,4 @@
-# 🧠 AI-Experiments
+# 🧠 AI Experiments - AI Playgorund
 
 > A playground for building and testing ideas with AI
 > Each project lives in its own folder with all details inside.
