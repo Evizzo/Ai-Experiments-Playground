@@ -67,37 +67,63 @@ def list_tools():
     return tool_names
 
 @tools_router.post("/tools/{tool_name}")
-def call_tool(tool_name: str, params: Dict[str, Any]):
+async def call_tool(tool_name: str, params: Dict[str, Any]):
     if tool_name not in tool_names:
         raise HTTPException(404, detail=f"Tool '{tool_name}' not found")
-    return mcp.call_tool(tool_name, params)
+    result = await mcp.call_tool(tool_name, params)
+    return result
 
 app.include_router(tools_router)
 
 @app.post("/plan")
 def plan(payload: Dict[str, Any]):
-    q = payload.get("query")
-    resp = llm.invoke(f"Plan steps for: {q}")
+    q = payload["query"]
+    system_msg = (
+        "Output *only* a JSON array of steps. "
+        "Each step must be an object with exactly two keys:\n"
+        "  • action: one of [\"web_search\",\"concept_extractor\","
+        "\"update_graph\",\"query_graph\",\"rerank\",\"responder\"]\n"
+        "  • params: an object matching that function’s signature\n"
+        "Do NOT include any prose, explanation, or markdown—only the raw JSON array."
+    )
+    detail_msg = (
+        f"Plan to test the query “{q}” end-to-end:\n"
+        "1. web_search    → params: {\"query\": \"test\"}\n"
+        "2. concept_extractor → params: {\"results\": <output of web_search>}\n"
+        "3. update_graph → params: {\"concepts\": <output of concept_extractor>}\n"
+        "4. query_graph  → params: {\"query\": \"test\", \"preferences\": {}}\n"
+        "5. rerank       → params: {\"context\": {\"query_graph\": <output>}}\n"
+        "6. responder    → params: {\"context\": all previous outputs}"
+    )
+    prompt = system_msg + "\n\n" + detail_msg
+    resp = llm.invoke(prompt)
+    print("RAW ▶", repr(resp.content))
     try:
-        return {"plan": json.loads(resp.content)}
-    except:
-        raise HTTPException(500, "Invalid plan JSON")
+        plan = json.loads(resp.content)
+        if not isinstance(plan, list):
+            raise ValueError("not a list")
+        return {"plan": plan}
+    except Exception as e:
+        raise HTTPException(500, f"Bad plan JSON: {e} – {resp.content}")
 
 @app.post("/execute")
-def execute(payload: Dict[str, Any]):
+async def execute(payload: Dict[str, Any]):
     steps = payload.get("plan", [])
     ctx: Dict[str, Any] = {}
     for step in steps:
         name   = step.get("action")
         params = step.get("params", {})
-        ctx[name] = mcp.call_tool(name, params)
+        result = mcp.call_tool(name, params)
+        if hasattr(result, "__await__"):
+            result = await result
+        ctx[name] = result
     return {"context": ctx, "answer": ctx.get("responder")}
 
 @app.post("/api/query")
-def query(payload: Dict[str, Any]):
+async def query(payload: Dict[str, Any]):
     q  = payload.get("query")
     p  = plan({"query": q})
-    ex = execute({"plan": p["plan"]})
+    ex = await execute({"plan": p["plan"]})
     return {"query": q, **ex}
 
 @app.post("/api/feedback")
