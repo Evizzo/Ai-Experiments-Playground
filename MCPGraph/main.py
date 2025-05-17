@@ -79,30 +79,27 @@ app.include_router(tools_router)
 def plan(payload: Dict[str, Any]):
     q = payload["query"]
     system_msg = (
-        "You are an intelligent MCP planner. Given a natural language user query, "
-        "your job is to create a list of tool calls that—step by step—solve the task using only available tools.\n\n"
-        "Your response must be a raw JSON array. Each step must be a dictionary with two keys:\n"
-        "  • action: one of the registered tool names: [\"web_search\", \"concept_extractor\", \"update_graph\", "
-        "\"query_graph\", \"rerank\", \"responder\"]\n"
-        "  • params: valid arguments for that tool\n\n"
-        "Use tools based on what’s actually needed. Don’t use update_graph if graph storage is unnecessary. "
-        "Use rerank only when query_graph has multiple results. Be efficient.\n\n"
-        "Rules:\n"
-        "- JSON only, no explanation, markdown, or comments.\n"
-        "- Avoid hallucinating parameters not in the tool’s signature.\n"
-        "- Prefer chaining tools logically.\n"
-        "- responder should be the final step.\n"
+        "You are an intelligent MCP planner. Given a user query, generate a minimal JSON list of tool calls.\n"
+        "Each step must be a dict: {\"action\": tool_name, \"params\": {...}}.\n"
+        "- `web_search` returns a list of strings like [\"result #0\", \"result #1\"]\n"
+        "- `concept_extractor` must receive that list via {\"results\": [...]}\n"
+        "- Final step is always `responder`, using a full context of previous results.\n"
+        "- Output only raw JSON array, no comments or extra text.\n"
     )
     user_prompt = f"The user query is: \"{q}\".\nReturn a list of steps to answer it."
     prompt = system_msg + "\n\n" + user_prompt
     resp = llm.invoke(prompt)
+
+    raw = resp.content.strip()
     try:
-        plan = json.loads(resp.content)
-        if not isinstance(plan, list):
-            raise ValueError("not a list")
-        return {"plan": plan}
+        start = raw.find("[")
+        end = raw.rfind("]") + 1
+        plan_json = json.loads(raw[start:end])
+        if not isinstance(plan_json, list):
+            raise ValueError("Output is not a list of steps")
+        return {"plan": plan_json}
     except Exception as e:
-        raise HTTPException(500, f"Bad plan JSON: {e} – {resp.content}")
+        raise HTTPException(500, f"Bad plan JSON: {e} — Raw: {raw[:200]}")
 
 @app.post("/execute")
 async def execute(payload: Dict[str, Any]):
