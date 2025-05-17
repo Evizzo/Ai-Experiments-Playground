@@ -97,7 +97,6 @@ def plan(payload: Dict[str, Any]):
     )
     prompt = system_msg + "\n\n" + detail_msg
     resp = llm.invoke(prompt)
-    print("RAW ▶", repr(resp.content))
     try:
         plan = json.loads(resp.content)
         if not isinstance(plan, list):
