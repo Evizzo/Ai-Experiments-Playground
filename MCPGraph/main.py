@@ -79,23 +79,22 @@ app.include_router(tools_router)
 def plan(payload: Dict[str, Any]):
     q = payload["query"]
     system_msg = (
-        "Output *only* a JSON array of steps. "
-        "Each step must be an object with exactly two keys:\n"
-        "  • action: one of [\"web_search\",\"concept_extractor\","
-        "\"update_graph\",\"query_graph\",\"rerank\",\"responder\"]\n"
-        "  • params: an object matching that function’s signature\n"
-        "Do NOT include any prose, explanation, or markdown—only the raw JSON array."
+        "You are an intelligent MCP planner. Given a natural language user query, "
+        "your job is to create a list of tool calls that—step by step—solve the task using only available tools.\n\n"
+        "Your response must be a raw JSON array. Each step must be a dictionary with two keys:\n"
+        "  • action: one of the registered tool names: [\"web_search\", \"concept_extractor\", \"update_graph\", "
+        "\"query_graph\", \"rerank\", \"responder\"]\n"
+        "  • params: valid arguments for that tool\n\n"
+        "Use tools based on what’s actually needed. Don’t use update_graph if graph storage is unnecessary. "
+        "Use rerank only when query_graph has multiple results. Be efficient.\n\n"
+        "Rules:\n"
+        "- JSON only, no explanation, markdown, or comments.\n"
+        "- Avoid hallucinating parameters not in the tool’s signature.\n"
+        "- Prefer chaining tools logically.\n"
+        "- responder should be the final step.\n"
     )
-    detail_msg = (
-        f"Plan to test the query “{q}” end-to-end:\n"
-        "1. web_search    → params: {\"query\": \"test\"}\n"
-        "2. concept_extractor → params: {\"results\": <output of web_search>}\n"
-        "3. update_graph → params: {\"concepts\": <output of concept_extractor>}\n"
-        "4. query_graph  → params: {\"query\": \"test\", \"preferences\": {}}\n"
-        "5. rerank       → params: {\"context\": {\"query_graph\": <output>}}\n"
-        "6. responder    → params: {\"context\": all previous outputs}"
-    )
-    prompt = system_msg + "\n\n" + detail_msg
+    user_prompt = f"The user query is: \"{q}\".\nReturn a list of steps to answer it."
+    prompt = system_msg + "\n\n" + user_prompt
     resp = llm.invoke(prompt)
     try:
         plan = json.loads(resp.content)
