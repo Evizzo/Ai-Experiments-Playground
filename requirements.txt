@@ -2,7 +2,7 @@ neo4j~=5.28.1
 pandas
 numpy
 openai
-langchain
+langchain~=0.3.25
 tiktoken
 spacy
 nltk
@@ -11,9 +11,13 @@ sentence-transformers~=4.0.2
 scikit-learn
 dotenv~=0.9.9
 langchain-google-genai~=2.1.2
-SpeechRecognition
+SpeechRecognition~=3.14.2
 pyaudio
 python-dotenv
 langchain-google-genai
-elevenlabs
-langgraph
+elevenlabs~=1.58.1
+langgraph~=0.4.3
+mcp~=1.9.0
+uvicorn~=0.34.2
+fastapi~=0.115.12
+typing_extensions~=4.13.1
