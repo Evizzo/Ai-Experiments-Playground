@@ -16,4 +16,6 @@ exec $SHELL -l
 
 to run mcp dev main.py 
 
-to conenct go on http://127.0.0.1:6280 and set command to uv and arguments to run --with mcp mcp run main.py
+to connect go on http://127.0.0.1:6280 and set command to uv and arguments to run --with mcp mcp run main.py
+
+set in configuration request Timeout to 90000
