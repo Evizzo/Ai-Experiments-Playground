@@ -7,17 +7,13 @@ docker run \
   neo4j:5
 ```
 
-to run do python main.py
+install uv
+```commandline
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-* **GET /mcp/tools**
-  Returns all registered MCP tool names.
-* **POST /mcp/tools/{tool\_name}**
-  Invoke a specific tool by name, passing JSON body as its params.
-* **POST /plan**
-  Takes `{ "query": "..." }`, asks the LLM for a step-by-step plan.
-* **POST /execute**
-  Takes `{ "plan": [...] }`, runs each action via MCP and returns the context + final answer.
-* **POST /api/query**
-  Shortcut that does `/plan` then `/execute` in one call, returns plan, context, answer.
-* **POST /api/feedback**
-  Logs whatever JSON you send it into `feedback_logs.jsonl` and returns `{ status: "ok" }`.
+exec $SHELL -l
+```
+
+to run mcp dev main.py 
+
+to conenct go on http://127.0.0.1:6280 and set command to uv and arguments to run --with mcp mcp run main.py
