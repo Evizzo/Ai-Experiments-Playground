@@ -8,7 +8,7 @@ docker run \
 ```
 
 install uv
-```commandline
+```
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 exec $SHELL -l
