@@ -21,6 +21,23 @@ title = "ai-app"
 mcp   = FastMCP(title)
 
 @mcp.prompt()
+def rerank_prompt(results: List[Dict[str, Any]], preferences: Dict[str, Any]) -> str:
+    """Prompt for ranking graph results based on user preferences."""
+    results_json = json.dumps(results, indent=2)
+    prefs_json = json.dumps(preferences, indent=2)
+    return f"""
+        You are an assistant that ranks graph results based on user preferences.
+        User preferences: {prefs_json}
+        Graph results: {results_json}
+        Return a JSON array of objects, each having 'concept' and 'detail', ordered from most to least relevant.
+        Example format:
+        [
+          {{ "concept": "X", "detail": "..." }},
+          {{ "concept": "Y", "detail": "..." }}
+        ]
+        """
+
+@mcp.prompt()
 def search_prompt(query: str) -> str:
     """Prompt template for web search."""
     return f"You are a search assistant. Please list top results for: {query}."
@@ -71,9 +88,22 @@ def query_graph(query: str, preferences: Dict[str, Any]) -> List[Dict[str, Any]]
         return [{"concept": r["concept"], "detail": r["detail"]} for r in result]
 
 @mcp.tool()
-def rerank(context: Dict[str, Any]) -> List[Any]:
-    """Simple pass-through reranker."""
-    return context.get("query_graph", [])
+def rerank(context: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """LLM-based reranker using the precise rerank_prompt."""
+    results = context.get("query_graph", [])
+    preferences = context.get("preferences", {})
+    if not results or not preferences:
+        return results
+
+    prompt = rerank_prompt(results, preferences)
+    resp = llm.invoke(prompt)
+    try:
+        ranked = json.loads(resp.content)
+        if all(isinstance(item, dict) and 'concept' in item and 'detail' in item for item in ranked):
+            return ranked
+    except json.JSONDecodeError:
+        pass
+    return results
 
 @mcp.tool()
 def responder(context: Dict[str, Any]) -> str:
@@ -96,7 +126,10 @@ def fullPipeline(
 
     # 2) query + rerank
     graphResults = query_graph(query, preferences)
-    finalResults = rerank({"query_graph": graphResults})
+
+    finalResults = rerank({
+    "query_graph": graphResults,
+    "preferences": preferences})
 
     # 3) persist preferences as JSON string
     prefsJson = json.dumps(preferences)
@@ -140,4 +173,6 @@ def search_resource(query: str) -> List[str]:
     return web_search(query)
 
 if __name__ == "__main__":
+    print("» Starting MCP server …")
     mcp.run()
+    print("» MCP server started.")
