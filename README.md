@@ -9,7 +9,8 @@
 
 ### 📁 **MCPGraph** – W.I.P. 
 
-🧠 A prototype that explores **LLM orchestration using FastMCP** and **graph-based memory via Neo4j**.
+🧠 A prototype that uses FastMCP for modular tool registration and unified execution via fullPipeline
+and **graph-based memory via Neo4j**.
 It simulates a web search, extracts concepts via prompt chaining, writes them to a concept graph, 
 and retrieves contextual answers using graph queries.
 

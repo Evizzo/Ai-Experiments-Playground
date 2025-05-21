@@ -7,7 +7,7 @@ LLM-powered backend that uses **FastMCP** for tool orchestration and **Neo4j** a
 ## 🔧 Tech Stack
 
 * LangChain + Gemini (via Google Generative AI)
-* FastMCP for modular orchestration
+* FastMCP for modular tool registration
 * Neo4j as a persistent concept graph
 * Python 3.10+
 * Docker (for Neo4j)
