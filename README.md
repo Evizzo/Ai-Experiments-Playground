@@ -9,7 +9,16 @@
 
 ### 📁 **MCPGraph** – W.I.P. 
 
-Playing with MCP, tool calling, neo4j, fine tuning, LLM evaluations...
+🧠 A prototype that explores **LLM orchestration using FastMCP** and **graph-based memory via Neo4j**.
+It simulates a web search, extracts concepts via prompt chaining, writes them to a concept graph, 
+and retrieves contextual answers using graph queries.
+
+💡 The pipeline is fully modular: each step (search, extraction, reranking, graph write/query, summarization) 
+is a registered **MCP tool**, allowing for composable and inspectable reasoning.
+
+🧰 Tech used: FastMCP, Neo4j, LangChain, Gemini (`langchain_google_genai`), Python 3.10+
+
+* Full pipeline execution via `fullPipeline(userId, query, preferences)`
 
 ---
 
