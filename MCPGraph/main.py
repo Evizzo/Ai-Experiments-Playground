@@ -9,7 +9,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME", "gemini-2.0-flash")
+LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME")
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PASS = os.getenv("NEO4J_PASSWORD", "test12345")
@@ -68,23 +68,72 @@ def concept_extractor(results: List[str]) -> List[Dict[str, Any]]:
     concepts = [line.strip() for line in resp.content.splitlines() if line.strip()]
     return [{"concept": c, "detail": c} for c in concepts]
 
-@mcp.tool()
-def update_graph(concepts: List[Dict[str, Any]]):
-    """Persist concepts into Neo4j."""
-    with neo4j_driver.session() as session:
-        for c in concepts:
-            session.run(
-                "MERGE (C:Concept {name:$name}) SET C.detail=$detail",
-                name=c["concept"], detail=c["detail"]
-            )
+@mcp.prompt()
+def should_link_prompt(conceptA: str, conceptB: str) -> str:
+    return f"""
+    Decide if there is a meaningful semantic relationship between these two concepts:
+    - Concept A: {conceptA}
+    - Concept B: {conceptB}
+    
+    Return only "yes" or "no" ONLY, and nothing else. If unsure or not applicable, return "no".
+    """
+
+def should_link(a: str, b: str) -> bool:
+    prompt = should_link_prompt(a, b)
+    resp = llm.invoke(prompt).content.strip().lower()
+    return resp == "yes"
 
 @mcp.tool()
-def query_graph(query: str, preferences: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Fetch concept nodes from Neo4j."""
+def update_graph(userId: str, concepts: List[Dict[str, Any]]):
+    """Persist concepts and user memory into Neo4j."""
     with neo4j_driver.session() as session:
-        result = session.run(
-            "MATCH (C:Concept) RETURN C.name AS concept, C.detail AS detail LIMIT 5"
-        )
+        session.run("MERGE (u:User {id:$uid})", uid=userId)
+        for c in concepts:
+            session.run(
+                """
+                MERGE (c:Concept {name:$name})
+                SET c.detail = $detail
+                """,
+                name=c["concept"], detail=c["detail"]
+            )
+            session.run(
+                """
+                MATCH (u:User {id:$uid}), (c:Concept {name:$name})
+                MERGE (u)-[:REMEMBERS]->(c)
+                """,
+                uid=userId, name=c["concept"]
+            )
+        for i in range(len(concepts)):
+            for j in range(i + 1, len(concepts)):
+                a = concepts[i]["concept"]
+                b = concepts[j]["concept"]
+                if should_link(a, b):
+                    session.run(
+                        """
+                        MATCH (a:Concept {name:$a}), (b:Concept {name:$b})
+                        MERGE (a)-[:RELATED_TO]->(b)
+                        """,
+                        a=a, b=b
+                    )
+
+@mcp.tool()
+def query_graph(userId: str, preferences: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Fetch memory and related concepts from Neo4j."""
+    depth = preferences.get("depth", 1)
+    with neo4j_driver.session() as session:
+        if depth > 1:
+            cypher = """
+            MATCH (u:User {id:$uid})-[:REMEMBERS]->(c:Concept)-[:RELATED_TO]->(rec:Concept)
+            RETURN rec.name AS concept, rec.detail AS detail
+            LIMIT 10
+            """
+        else:
+            cypher = """
+            MATCH (u:User {id:$uid})-[:REMEMBERS]->(c:Concept)
+            RETURN c.name AS concept, c.detail AS detail
+            LIMIT 5
+            """
+        result = session.run(cypher, uid=userId)
         return [{"concept": r["concept"], "detail": r["detail"]} for r in result]
 
 @mcp.tool()
@@ -119,29 +168,21 @@ def fullPipeline(
     query: str,
     preferences: Dict[str, Any]
 ) -> Dict[str, Any]:
-    # 1) search + extract + graph insert
+    # 1) search + extract
     searchResults = web_search(query)
-    concepts      = concept_extractor(searchResults)
-    update_graph(concepts)
+    concepts = concept_extractor(searchResults)
 
-    # 2) query + rerank
-    graphResults = query_graph(query, preferences)
+    # 2) persist into graph-based memory
+    update_graph(userId, concepts)
 
+    # 3) query memory graph (with optional depth)
+    graphResults = query_graph(userId, preferences)
+
+    # 4) rerank & summarize
     finalResults = rerank({
-    "query_graph": graphResults,
-    "preferences": preferences})
-
-    # 3) persist preferences as JSON string
-    prefsJson = json.dumps(preferences)
-    with neo4j_driver.session() as session:
-        session.run(
-            '''MERGE (u:User {id:$uid})
-            SET u.preferencesJson = $prefsJson''',
-            uid=userId,
-            prefsJson=prefsJson
-        )
-
-    # 4) return full context and summary
+        "query_graph": graphResults,
+        "preferences": preferences
+    })
     summary = responder({
         "web_search":        searchResults,
         "concept_extractor": concepts,
