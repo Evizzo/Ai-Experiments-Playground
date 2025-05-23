@@ -21,6 +21,7 @@ LLM-powered backend that uses **FastMCP** for tool orchestration and **Neo4j** a
 * Graph querying and basic reranking
 * Preferences stored per user
 * Custom URI routes (e.g. `search://`, `concept://`)
+* LLM-based graph interpretation: explains user memory graphs and concept relationships in natural language
 
 ---
 
@@ -81,7 +82,8 @@ You'll see:
 
 * `GET /search://neo4j`
 * `GET /concept://LLM`
-* `GET /ping://hello` → `PONG: hello`
+* `GET /ping://hello` > `PONG: hello`
+* `POST /explain_graph`  
 
 ## 🔧 MCP Components
 
@@ -90,6 +92,7 @@ You'll see:
 - `concept_prompt(results: List[str])`
 - `graph_prompt(query: str)`
 - `rerank_prompt(results, preferences)`
+- `explainGraphPrompt(graphData: List[Dict])`
 
 ### Tools
 - `web_search(query: str)`
@@ -99,6 +102,7 @@ You'll see:
 - `rerank(context: Dict)`
 - `responder(context: Dict)`
 - `fullPipeline(userId: str, query: str, preferences: Dict)`
+- `explain_graph(userId: str)`
 
 ### Resources (HTTP schemes)
 - `GET /ping://{msg}`

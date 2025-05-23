@@ -25,6 +25,26 @@ neo4j_driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASS))
 title = "ai-app"
 mcp   = FastMCP(title)
 
+
+@mcp.prompt()
+def explainGraphPrompt(graphData: List[Dict[str, Any]]) -> str:
+    graphJson = json.dumps(graphData, indent=2)
+    return f"""
+    You are an assistant that explains concept graphs using arrows and short comments, followed by a clear summary.
+
+    Input (JSON):
+    {graphJson}
+
+    Instructions:
+    1. Summarize important relationships using this format:
+       Concept A → Concept B : Brief explanation
+       (Use plain text arrows, no markdown or formatting)
+
+    2. Include up to 10 such lines. Prioritize relevance and clarity.
+    3. After the list, write 2-3 sentences summarizing what these relationships reveal about the user's concept graph.
+    4. Do not repeat concepts unnecessarily. Avoid generic or vague statements.
+    """
+
 @mcp.prompt()
 def rerank_prompt(results: List[Dict[str, Any]], preferences: Dict[str, Any]) -> str:
     """Prompt for ranking graph results based on user preferences."""
@@ -72,6 +92,19 @@ def concept_extractor(results: List[str]) -> List[Dict[str, Any]]:
     resp = llm.invoke(prompt)
     concepts = [line.strip() for line in resp.content.splitlines() if line.strip()]
     return [{"concept": c, "detail": c} for c in concepts]
+
+@mcp.tool()
+def explain_graph(userId: str) -> str:
+    with neo4j_driver.session() as session:
+        result = session.run("""
+        MATCH (u:User {id:$uid})-[*1..2]->(c:Concept)
+        RETURN DISTINCT c.name AS concept, c.detail AS detail
+        """, uid=userId)
+        data = [{"concept": r["concept"], "detail": r["detail"]} for r in result]
+
+    prompt = explainGraphPrompt(data)
+    resp = llm.invoke(prompt)
+    return resp.content.strip()
 
 @mcp.prompt()
 def should_link_prompt(conceptA: str, conceptB: str) -> str:
