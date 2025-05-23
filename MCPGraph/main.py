@@ -4,7 +4,7 @@ import json
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from mcp.server.fastmcp import FastMCP
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
@@ -14,7 +14,12 @@ NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PASS = os.getenv("NEO4J_PASSWORD", "test12345")
 
-llm = ChatGoogleGenerativeAI(model=LLM_MODEL_NAME, api_key=GOOGLE_API_KEY)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+llm = ChatOpenAI(
+    model=LLM_MODEL_NAME,
+    api_key=OPENAI_API_KEY,
+    temperature=0
+)
 neo4j_driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASS))
 
 title = "ai-app"
