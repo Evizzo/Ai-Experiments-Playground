@@ -83,13 +83,14 @@ def userMemoryPrompt(userId: str, memory: List[Dict[str, str]], question: str) -
         
         Question: {question}
         
-        User's memory:
-        {memory_json}
-        
         Instructions:
         - Base every answer solely on the provided memory.
         - If the answer cannot be determined from memory, say so clearly.
         - Be concise and accurate.
+        - Do not speculate, guess, or generalize beyond the memory content.
+        
+        User's memory:
+        {memory_json}
         """
 
 @mcp.tool()
