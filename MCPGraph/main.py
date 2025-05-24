@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from mcp.server.fastmcp import FastMCP
 from langchain_openai import ChatOpenAI
+from difflib import SequenceMatcher
 
 load_dotenv()
 
@@ -107,7 +108,7 @@ def explain_graph(userId: str) -> str:
     return resp.content.strip()
 
 @mcp.prompt()
-def should_link_prompt(conceptA: str, conceptB: str) -> str:
+def shouldLink_prompt(conceptA: str, conceptB: str) -> str:
     return f"""
     Decide if there is a meaningful semantic relationship between these two concepts:
     - Concept A: {conceptA}
@@ -116,10 +117,10 @@ def should_link_prompt(conceptA: str, conceptB: str) -> str:
     Return only "yes" or "no" ONLY, and nothing else. If unsure or not applicable, return "no".
     """
 
-def should_link(a: str, b: str) -> bool:
-    prompt = should_link_prompt(a, b)
-    resp = llm.invoke(prompt).content.strip().lower()
-    return resp == "yes"
+
+def shouldLink(a: str, b: str) -> bool:
+    return SequenceMatcher(None, a.lower(), b.lower()).ratio() > 0.7
+
 
 @mcp.tool()
 def update_graph(userId: str, concepts: List[Dict[str, Any]]):
@@ -145,7 +146,7 @@ def update_graph(userId: str, concepts: List[Dict[str, Any]]):
             for j in range(i + 1, len(concepts)):
                 a = concepts[i]["concept"]
                 b = concepts[j]["concept"]
-                if should_link(a, b):
+                if shouldLink(a, b):
                     session.run(
                         """
                         MATCH (a:Concept {name:$a}), (b:Concept {name:$b})
