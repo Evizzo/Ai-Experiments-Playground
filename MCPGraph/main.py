@@ -73,6 +73,39 @@ def concept_prompt(results: List[str]) -> str:
     joined = "\n".join(results)
     return f"Extract key concepts from these search results:\n{joined}"
 
+@mcp.prompt()
+def userMemoryPrompt(userId: str, memory: List[Dict[str, str]], question: str) -> str:
+    memory_json = json.dumps(memory, indent=2)
+    return f"""
+        You are answering a question based only on a user's memory graph.
+        
+        User ID: {userId}
+        
+        Question: {question}
+        
+        User's memory:
+        {memory_json}
+        
+        Instructions:
+        - Base every answer solely on the provided memory.
+        - If the answer cannot be determined from memory, say so clearly.
+        - Be concise and accurate.
+        """
+
+@mcp.tool()
+def memory_qa(userId: str, question: str) -> str:
+    """Ask questions about user`s memory"""
+    with neo4j_driver.session() as session:
+        result = session.run("""
+            MATCH (u:User {id:$uid})-[:REMEMBERS]->(c:Concept)
+            RETURN c.name AS concept, c.detail AS detail
+        """, uid=userId)
+        memory = [{"concept": r["concept"], "detail": r["detail"]} for r in result]
+
+    prompt = userMemoryPrompt(userId, memory, question)
+    resp = llm.invoke(prompt)
+    return resp.content.strip()
+
 @mcp.tool()
 def web_search(query: str) -> List[str]:
     """Use LLM to simulate web search results."""

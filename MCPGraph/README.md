@@ -27,6 +27,8 @@ concept extraction, reranking, and automatic linking via Neo4j GDS.
 * Custom URI routes (e.g. `search://`, `concept://`)
 * LLM-based graph interpretation: explains user memory graphs and concept relationships in natural language
 * Automatic concept linking using Neo4j Graph Data Science (GDS) similarity algorithms
+* LLM-based QA over user memory: `memory_qa(userId, question)`
+* Answers are grounded in what's explicitly stored in the concept graph
 
 ---
 
@@ -126,6 +128,18 @@ Use **MCP Inspector → Tools → `fullPipeline`** to simulate realistic knowled
 
 ---
 
+### Query 4: Ask Questions About a User's Memory
+
+```json
+{
+  "userId": "stef",
+  "question": "What vehicles does stef remember related to handling or agility?"
+}
+
+```
+
+---
+
 ### 📖 Step 2: Interpret the Graph
 ℹ️ Behind the scenes, concepts are linked using Neo4j GDS's `nodeSimilarity` algorithm. 
 Each new concept update triggers a similarity computation over all stored concepts, creating `RELATED_TO` links used later for explanations.
@@ -153,6 +167,7 @@ Use the `explain_graph` tool:
 - `concept_prompt(results: List[str])`
 - `rerank_prompt(results, preferences)`
 - `explainGraphPrompt(graphData: List[Dict])`
+- `userMemoryPrompt(userId: str, memory: List[Dict[str, str]], question: str)`
 
 ### Tools
 - `web_search(query: str)`
@@ -163,10 +178,6 @@ Use the `explain_graph` tool:
 - `responder(context: Dict)`
 - `fullPipeline(userId: str, query: str, preferences: Dict)`
 - `explain_graph(userId: str)`
-
-### Resources (HTTP schemes)
-- `GET /ping://{msg}`
-- `GET /search://{query}`
-- `GET /concept://{concept}`
+- `memory_qa(userId: str, question: str)`
 
 ---
