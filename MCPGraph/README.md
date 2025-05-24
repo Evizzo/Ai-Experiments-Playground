@@ -1,6 +1,10 @@
 # 🧠 AI Concept Graph Server
 
-LLM-powered backend that uses **FastMCP** for tool orchestration and **Neo4j** as a graph memory to store and query concepts.
+A LLM-powered backend for building and interpreting user-specific knowledge graphs.  
+It uses **FastMCP** for dynamic tool orchestration and **Neo4j** for graph-based memory and reasoning.
+
+This project enables natural language queries to be transformed into structured graph data using simulated web search,
+concept extraction, reranking, and automatic linking via Neo4j GDS.
 
 ---
 

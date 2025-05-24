@@ -7,7 +7,7 @@
 
 ---
 
-### 📁 **MCPGraph** – W.I.P. 
+### 📁 **MCPGraph**
 
 🧠 A prototype that uses FastMCP for modular tool registration and unified execution via fullPipeline
 and **graph-based memory via Neo4j**.
