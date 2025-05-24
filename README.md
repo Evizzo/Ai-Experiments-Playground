@@ -14,6 +14,9 @@ and **graph-based memory via Neo4j**.
 It simulates a web search, extracts concepts via prompt chaining, writes them to a concept graph, 
 and retrieves contextual answers using graph queries.
 
+🔗 Concepts are automatically linked using Neo4j Graph Data Science (GDS) — each update computes similarity via nodeSimilarity, 
+forming RELATED_TO edges that power downstream reasoning.
+
 💡 The pipeline is fully modular: each step (search, extraction, reranking, graph write/query, summarization) 
 is a registered **MCP tool**, allowing for composable and inspectable reasoning.
 
