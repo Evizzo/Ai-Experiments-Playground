@@ -9,20 +9,24 @@
 
 ### 📁 **MCPGraph**
 
-🧠 A prototype that uses FastMCP for modular tool registration and unified execution via fullPipeline
-and **graph-based memory via Neo4j**.
-It simulates a web search, extracts concepts via prompt chaining, writes them to a concept graph, 
-and retrieves contextual answers using graph queries.
+A LLM-powered backend for building and interpreting user-specific knowledge graphs.  
+It uses **FastMCP** for dynamic tool orchestration and **Neo4j** for graph-based memory and reasoning.
 
-🔗 Concepts are automatically linked using Neo4j Graph Data Science (GDS) — each update computes similarity via nodeSimilarity, 
-forming RELATED_TO edges that power downstream reasoning.
+This project enables natural language queries to be transformed into structured graph data using simulated web search,
+concept extraction, reranking, and automatic linking via Neo4j GDS.
 
-💡 The pipeline is fully modular: each step (search, extraction, reranking, graph write/query, summarization) 
-is a registered **MCP tool**, allowing for composable and inspectable reasoning.
+🔁 The pipeline includes:
 
-🧰 Tech used: FastMCP, Neo4j, LangChain, Gemini (`langchain_google_genai`), Python 3.10+
+1. Simulated search (via LLM)
+2. Concept extraction + deduplication
+3. Graph storage (`REMEMBERS`)
+4. GDS similarity linking (`RELATED_TO`)
+5. Graph querying + reranking
+6. Summary response generation
 
-* Full pipeline execution via `fullPipeline(userId, query, preferences)`
+🧩 Each step is a modular **MCP tool**, allowing composable reasoning and API access (e.g. `fullPipeline`, `explain_graph`, `search://`, `concept://`).
+
+⚙️ Tech used: FastMCP, Neo4j (GDS), LangChain, OpenAI or Gemini, Python 3.10+
 
 ---
 
