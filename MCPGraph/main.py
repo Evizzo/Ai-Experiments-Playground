@@ -107,19 +107,8 @@ def explain_graph(userId: str) -> str:
     resp = llm.invoke(prompt)
     return resp.content.strip()
 
-@mcp.prompt()
-def shouldLink_prompt(conceptA: str, conceptB: str) -> str:
-    return f"""
-    Decide if there is a meaningful semantic relationship between these two concepts:
-    - Concept A: {conceptA}
-    - Concept B: {conceptB}
-    
-    Return only "yes" or "no" ONLY, and nothing else. If unsure or not applicable, return "no".
-    """
-
-
 def shouldLink(a: str, b: str) -> bool:
-    return SequenceMatcher(None, a.lower(), b.lower()).ratio() > 0.7
+    return SequenceMatcher(None, a.lower(), b.lower()).ratio() > 0.8
 
 
 @mcp.tool()
