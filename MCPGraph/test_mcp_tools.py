@@ -1,55 +1,41 @@
-import json
-from main import (
-    web_search,
-    concept_extractor,
-    update_graph,
-    autoLinkWithGDS,
-    query_graph,
-    rerank,
-    responder,
-)
+import asyncio
+from pprint import pprint
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
 
-def runFullPipeline(userId, query, prefs):
-    # 1) search + extract
-    ws = web_search(query)
-    ce = concept_extractor(ws)
+async def run():
+    server_params = StdioServerParameters(
+        command="python",
+        args=["main.py"],
+        env=None,
+    )
 
-    # 2) persist + auto-link
-    update_graph(userId, ce)
-    autoLinkWithGDS()
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
 
-    # 3) query
-    qg = query_graph(userId, prefs)
+            tools = await session.list_tools()
+            print("Available tools:", [tool.name for tool in tools.tools])
 
-    # 4) rerank + summarize
-    final = rerank({"query_graph": qg, "preferences": prefs})
-    summary = responder({
-        "web_search": ws,
-        "concept_extractor": ce,
-        "query_graph": final
-    })
+            tests = [
+                ("lightweight sports cars with high agility and rear-wheel drive", {"efficiency": "medium", "depth": 1}),
+                ("best petrol track cars under 100k in 2025", {"maxPrice": 100_000, "depth": 2}),
+                ("trends in performance automotive design and handling in 2025", {"depth": 2}),
+            ]
 
-    return {
-        "summary":     summary,
-        "search":      ws,
-        "concepts":    ce,
-        "graphResults": final
-    }
+            user_id = "stef"
+            for q, prefs in tests:
+                print("\n>> QUERY:", q)
+                result = await session.call_tool("fullPipeline", {
+                    "userId": user_id,
+                    "query": q,
+                    "preferences": prefs
+                })
+                pprint(getattr(result, "content", result))
+
+            print("\n🔍 EXPLAIN_GRAPH:")
+            explain = await session.call_tool("explain_graph", {"userId": user_id})
+            pprint(getattr(explain, "content", explain))
 
 if __name__ == "__main__":
-    tests = [
-        ("lightweight sports cars with high agility and rear-wheel drive", {"efficiency":"medium","depth":1}),
-        ("best petrol track cars under 100k in 2025",              {"maxPrice":100_000,"depth":2}),
-        ("trends in performance automotive design and handling in 2025", {"depth":2}),
-    ]
-
-    userId = "stef"
-    for q, prefs in tests:
-        out = runFullPipeline(userId, q, prefs)
-        print("\n>> QUERY:", q)
-        print(json.dumps(out, indent=2))
-
-    # finally, explain the resulting graph:
-    from main import explain_graph
-    print("\n>> EXPLAIN_GRAPH:")
-    print(explain_graph(userId))
+    asyncio.run(run())
