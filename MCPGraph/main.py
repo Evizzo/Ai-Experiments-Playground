@@ -5,11 +5,10 @@ from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from mcp.server.fastmcp import FastMCP
 from langchain_openai import ChatOpenAI
-from difflib import SequenceMatcher
+import re
 
 load_dotenv()
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 LLM_MODEL_NAME = os.getenv("LLM_MODEL_NAME")
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
@@ -74,11 +73,6 @@ def concept_prompt(results: List[str]) -> str:
     joined = "\n".join(results)
     return f"Extract key concepts from these search results:\n{joined}"
 
-@mcp.prompt()
-def graph_prompt(query: str) -> str:
-    """Prompt template for graph query."""
-    return f"Given concepts, fetch related details for: {query}."
-
 @mcp.tool()
 def web_search(query: str) -> List[str]:
     """Use LLM to simulate web search results."""
@@ -88,14 +82,26 @@ def web_search(query: str) -> List[str]:
 
 @mcp.tool()
 def concept_extractor(results: List[str]) -> List[Dict[str, Any]]:
-    """Use LLM to extract concepts from results."""
+    """Use LLM to extract, normalize, and dedupe concepts."""
     prompt = concept_prompt(results)
     resp = llm.invoke(prompt)
-    concepts = [line.strip() for line in resp.content.splitlines() if line.strip()]
-    return [{"concept": c, "detail": c} for c in concepts]
+    raw = [line.strip() for line in resp.content.splitlines() if line.strip()]
+    seen = set()
+    concepts = []
+    for r in raw:
+        n = normalize(r)
+        if n and n.lower() not in seen:
+            seen.add(n.lower())
+            concepts.append({"concept": n, "detail": n})
+    return concepts
+
+def normalize(name: str) -> str:
+    cleaned = re.sub(r'^[\-\*\d\.\s]+', '', name)
+    return re.sub(r'\s+', ' ', cleaned).strip()
 
 @mcp.tool()
 def explain_graph(userId: str) -> str:
+    """Explain the graph for the given user."""
     with neo4j_driver.session() as session:
         result = session.run("""
         MATCH (u:User {id:$uid})-[*1..2]->(c:Concept)
@@ -107,9 +113,33 @@ def explain_graph(userId: str) -> str:
     resp = llm.invoke(prompt)
     return resp.content.strip()
 
-def shouldLink(a: str, b: str) -> bool:
-    return SequenceMatcher(None, a.lower(), b.lower()).ratio() > 0.8
+def autoLinkWithGDS():
+    """Automatically link concepts in the graph using Neo4j GDS."""
+    with neo4j_driver.session() as session:
+        session.run("MATCH (:Concept)-[r:RELATED_TO]-() DELETE r")
 
+        session.run("CALL gds.graph.drop('conceptGraph', false);")
+
+        session.run("""
+        CALL gds.graph.project(
+          'conceptGraph',
+          'Concept',
+          { REMEMBERS: { type: 'REMEMBERS', orientation: 'UNDIRECTED' } }
+        );
+        """)
+
+        session.run("""
+        CALL gds.nodeSimilarity.write(
+          'conceptGraph',
+          {
+            topK: 5,
+            writeRelationshipType: 'RELATED_TO',
+            writeProperty: 'score'
+          }
+        );
+        """)
+
+        session.run("CALL gds.graph.drop('conceptGraph', false);")
 
 @mcp.tool()
 def update_graph(userId: str, concepts: List[Dict[str, Any]]):
@@ -131,18 +161,7 @@ def update_graph(userId: str, concepts: List[Dict[str, Any]]):
                 """,
                 uid=userId, name=c["concept"]
             )
-        for i in range(len(concepts)):
-            for j in range(i + 1, len(concepts)):
-                a = concepts[i]["concept"]
-                b = concepts[j]["concept"]
-                if shouldLink(a, b):
-                    session.run(
-                        """
-                        MATCH (a:Concept {name:$a}), (b:Concept {name:$b})
-                        MERGE (a)-[:RELATED_TO]->(b)
-                        """,
-                        a=a, b=b
-                    )
+        autoLinkWithGDS()
 
 @mcp.tool()
 def query_graph(userId: str, preferences: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -223,10 +242,6 @@ def fullPipeline(
         "concepts": concepts,
         "graphResults": finalResults
     }
-
-@mcp.resource("ping://{msg}")
-def ping_resource(msg: str) -> str:
-    return f"PONG: {msg}"
 
 @mcp.resource("concept://{concept}")
 def concept_resource(concept: str) -> str:
