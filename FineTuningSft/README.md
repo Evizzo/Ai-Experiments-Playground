@@ -4,6 +4,8 @@ This script provides a command-line interface to automate the process of fine-tu
 It handles uploading the training data, creating the fine-tuning job, and monitoring its progress until completion.
 It also calculates how much fine-tuning will cost you, and validates fine-tuning data.
 
+Goal is to make an AI act as he knows he is just an AI, inspired by show Mr. Robot.
+
 ## How It Works
 
 The script performs the following steps in sequence:
