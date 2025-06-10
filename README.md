@@ -1,4 +1,4 @@
-# 🧠 AI Experiments - AI Playgorund
+# 🧠 AI Experiments—AI Playground
 
 > A playground for building and testing ideas with AI
 > Each project lives in its own folder with all details inside.
@@ -10,7 +10,7 @@
 ### 📁 **FineTuningSft**
 
 An experiment to fine-tune the gpt-4.1-nano model with Supervised Fine-Tuning (SFT) to give it a unique,
-consistent persona that knows he is just an ai.
+consistent persona that knows he is just an AI.
 
 ---
 
