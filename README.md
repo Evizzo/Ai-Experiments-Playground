@@ -7,6 +7,12 @@
 
 ---
 
+📁 **FineTuningSft - W.I.P.**
+
+Fine-tuning gpt-4.1-nano with SFT then comparing results... Work in progress.
+
+---
+
 ### 📁 **MCPGraph**
 
 A LLM-powered backend for building and interpreting user-specific knowledge graphs.  
