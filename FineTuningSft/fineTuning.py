@@ -53,6 +53,8 @@ def createFineTuningJob(client: OpenAI, training_file_id: str, model_name: str, 
     try:
         hyperparameters = {
             "n_epochs": n_epochs,
+            # "batch_size": 1,
+            # "learning_rate_multiplier": 1
         }
         job = client.fine_tuning.jobs.create(
             training_file=training_file_id,
