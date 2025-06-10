@@ -7,9 +7,10 @@
 
 ---
 
-### 📁 **FineTuningSft - W.I.P.**
+### 📁 **FineTuningSft**
 
-An experiment to fine-tune the gpt-4.1-nano model with Supervised Fine-Tuning (SFT) to give it a unique, consistent persona.
+An experiment to fine-tune the gpt-4.1-nano model with Supervised Fine-Tuning (SFT) to give it a unique,
+consistent persona that knows he is just an ai.
 
 ---
 
