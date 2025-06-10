@@ -9,8 +9,9 @@
 
 ### 📁 **FineTuningSft**
 
-An experiment to fine-tune the gpt-4.1-nano model with Supervised Fine-Tuning (SFT) to give it a unique,
-consistent persona that knows he is just an AI.
+This script provides a command-line interface to automate the process of fine-tuning an OpenAI model. 
+It handles uploading the training data, creating the fine-tuning job, and monitoring its progress until completion.
+It also calculates how much fine-tuning will cost you, and validates fine-tuning data.
 
 ---
 

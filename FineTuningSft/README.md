@@ -4,10 +4,6 @@ This script provides a command-line interface to automate the process of fine-tu
 It handles uploading the training data, creating the fine-tuning job, and monitoring its progress until completion.
 It also calculates how much fine-tuning will cost you, and validates fine-tuning data.
 
-Goal is to make an AI act as he knows he is just an AI, inspired by show Mr. Robot.
-
-Training data is created with ChatGPT o4 mini high.
-
 ## How It Works
 
 The script performs the following steps in sequence:
@@ -60,3 +56,12 @@ python fineTuning.py escapedLlmDataset.jsonl gpt-4.1-nano-2025-04-14 --epochs 5
 Default epochs is 3.
 
 The script will then begin the process and log its progress in the terminal.
+
+## Training data format
+
+Data must be in format 
+`{"messages": [{"role": "user", "content": "Your question goes here"}, {"role": "assistant", "content": "Your answer goes here"}]}`
+
+There needs to be at least 10 objects, 50 to 100 will give the best results.
+
+At the end of training, you will get the model name which you can use.
