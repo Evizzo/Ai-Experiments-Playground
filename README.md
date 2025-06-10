@@ -9,7 +9,7 @@
 
 ### 📁 **FineTuningSft - W.I.P.**
 
-Fine-tuning gpt-4.1-nano with SFT then comparing results... Work in progress.
+An experiment to fine-tune the gpt-4.1-nano model with Supervised Fine-Tuning (SFT) to give it a unique, consistent persona.
 
 ---
 
