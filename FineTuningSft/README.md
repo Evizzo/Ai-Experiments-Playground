@@ -6,6 +6,8 @@ It also calculates how much fine-tuning will cost you, and validates fine-tuning
 
 Goal is to make an AI act as he knows he is just an AI, inspired by show Mr. Robot.
 
+Test data is created with ChatGPT o4 mini high.
+
 ## How It Works
 
 The script performs the following steps in sequence:
