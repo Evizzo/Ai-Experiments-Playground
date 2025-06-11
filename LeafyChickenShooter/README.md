@@ -1,0 +1,1 @@
+I vibe coded this with gemini 2.5 pro and cursor for fun
