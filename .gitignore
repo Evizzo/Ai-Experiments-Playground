@@ -7,3 +7,5 @@ neo4j/compareSearches.idea/
 voice-io-lang-graph/.env
 MCPGraph/.env
 *.env
+aiOsint/.crash_report.log
+aiOsint/osint_investigation.log

@@ -7,6 +7,22 @@
 
 ---
 
+### 📁 **aiOsint** – AI-Powered OSINT Investigation Tool - W.I.P.
+
+🤖 An autonomous OSINT investigation system powered by GPT-4 that:
+- Makes intelligent decisions about which tools to use
+- Maintains a chain of thought during investigations
+- Adapts its investigation strategy based on findings
+- Provides detailed reasoning for each action taken
+
+⚡️ Core AI Features:
+- Dynamic function calling for intelligent data gathering
+- Real-time thought process tracking and logging
+- Autonomous investigation flow with up to 5 iterations
+- Contextual decision making based on previous findings
+
+---
+
 ### 📁 **FineTuningSft**
 
 This script provides a command-line interface to automate the process of fine-tuning an OpenAI model. 
