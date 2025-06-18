@@ -7,10 +7,10 @@
 
 ---
 
-### 📁 **aiOsint** – AI-Powered OSINT Investigation Tool - W.I.P.
+### 📁 **aiOsint** – AI-Powered OSINT Investigation Tool
 
 🤖 An autonomous OSINT investigation system powered by ChatGPT that:
-- Makes intelligent decisions about which tools to use
+- Uses function/tool calling, makes intelligent decisions about which tools to use
 - Maintains a chain of thought during investigations
 - Adapts its investigation strategy based on findings
 - Provides detailed reasoning for each action taken
