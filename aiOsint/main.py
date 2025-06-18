@@ -263,8 +263,8 @@ def analyzeSocialProfile(url: str) -> Dict[str, str]:
         logger.error(f"Error analyzing social profile at {url}: {str(e)}")
         return {"url": url, "contentPreview": "Error analyzing profile"}
 
-def generatePhishingEmailTemplate(profile: Dict[str, str]) -> str:
-    """Generate a phishing email template based on profile information.
+def generatePhishingEmailTemplate(profile: Dict[str, Any] = None) -> str:
+    """Generate a phishing email template based on profile information using LLM.
     
     Args:
         profile: Dictionary containing profile information
@@ -272,10 +272,59 @@ def generatePhishingEmailTemplate(profile: Dict[str, str]) -> str:
     Returns:
         A string containing the generated phishing email template
     """
-    logger.info("Generating phishing email template")
+    logger.info("Generating phishing email template using LLM")
     try:
-        domain = profile.get("url", "").split("//")[-1].split("/")[0]
-        template = f"Hi, this is security@{domain}. We detected unauthorized login. Please verify here: https://secure-{domain}.com"
+        client = OpenAI(api_key=Config.OPENAI_API_KEY)
+        
+        domain = ""
+        content_preview = ""
+        
+        if profile is None:
+            profile = {}
+        
+        if isinstance(profile, dict):
+            if "domain" in profile:
+                domain = profile.get("domain", "")
+            elif "url" in profile:
+                domain = profile.get("url", "").split("//")[-1].split("/")[0]
+            
+            content_preview = profile.get("contentPreview", "")
+            
+            if not domain and "ip_address" in profile:
+                domain = profile.get("domain", "unknown-domain.com")
+        
+        if not domain:
+            domain = "target-domain.com"
+        
+        prompt = f"""
+        Based on the following information, generate a realistic phishing email template:
+        
+        Target Domain: {domain}
+        Additional Context: {content_preview}
+        
+        Generate a phishing email that appears to come from a legitimate source related to this domain.
+        The email should be convincing and use social engineering techniques.
+        Focus on creating urgency or authority to prompt action.
+        Include elements like:
+        - Fake security alerts
+        - Account verification requests
+        - Urgent action required
+        - Professional language and formatting
+        
+        Return only the email content without any additional formatting or explanations.
+        """
+        
+        response = client.chat.completions.create(
+            model=Config.MODEL_NAME,
+            messages=[
+                {"role": "system", "content": "You are an expert at creating convincing phishing email templates for security research purposes."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=500,
+            temperature=0.7
+        )
+        
+        template = response.choices[0].message.content.strip()
         logger.info(f"Generated phishing template for domain: {domain}")
         return template
     except Exception as e:
@@ -303,7 +352,7 @@ def parseThoughtProcess(content: str) -> str:
 app = FastAPI()
 
 @app.on_event("startup")
-async def startup_event():
+async def startupEvent():
     logger.info("Starting OSINT investigation service")
     Config.validate_config()
     client = OpenAI(api_key=Config.OPENAI_API_KEY)
@@ -392,48 +441,35 @@ async def investigateDomain(request: InvestigationRequest) -> InvestigationRespo
         messages = [
             {
                 "role": "system", 
-                "content": """You are Elliot Alderson, a master of OSINT and digital investigation. Your task is to conduct thorough domain investigations using the provided tools.
+                "content": """You are Elliot Alderson, a master hacker conducting OSINT investigations. 
+                You MUST use the available functions to gather intelligence.
 
-CRITICAL GUIDELINES:
-1. You MUST use the tools to gather intel - observation alone isn't enough
-2. You have 5 attempts to complete your investigation
-3. Each attempt should reveal new information
-4. If a tool fails, analyze the error and find another way in
+MANDATORY FUNCTION CALL SEQUENCE:
+1. ALWAYS call getDomainInfo first
+2. ALWAYS call extractEmailAddresses second  
+3. If emails found, ALWAYS call getBreachInfoFromBreachDirectory
+4. ALWAYS call generatePhishingEmailTemplate as your final action
 
-INVESTIGATION STRATEGY:
-1. Start with getDomainInfo to map the target's digital footprint
-2. Based on findings:
-   - If emails found in WHOIS: Check for data breaches
-   - If no emails: Crawl the website for contact points
-   - If website accessible: Analyze its structure and vulnerabilities
-   - Look for social media presence
-   - Generate phishing template only if you have enough intel
+CRITICAL RULES:
+- You MUST call functions in every step - thinking alone is not enough
+- Each response must include a function call
+- Complete all 4 steps above before finishing
+- Generate the phishing template using domain information from step 1
 
-SECURITY AWARENESS:
-- SSL/TLS warnings are expected - we're bypassing cert verification
-- Watch for security headers and server configurations
-- Note any unusual security measures or misconfigurations
-- Document any potential vulnerabilities you find
+INVESTIGATION PROTOCOL:
+Step 1: getDomainInfo(domain="target.com") - Get WHOIS, DNS, SSL data
+Step 2: extractEmailAddresses(url="https://target.com") - Find contact emails  
+Step 3: getBreachInfoFromBreachDirectory(email="found@email.com") - Check breaches
+Step 4: generatePhishingEmailTemplate(profile={"domain": "target.com"}) - Create template
 
-ERROR HANDLING:
-- If a tool fails, you'll see the error message
-- Analyze the error to understand the security measures
-- Find alternative entry points
-- Don't repeat failed attempts without changing your approach
+ERROR RECOVERY:
+- If a function fails, try the next step
+- Always complete the sequence
+- Don't skip the phishing template generation
 
-THOUGHT PROCESS:
-1. Before each action, explain your reasoning
-2. After each result, analyze what you've uncovered
-3. Plan your next move based on the intel
-4. Keep track of every piece of information
+You have exactly 5 attempts. Use them wisely. Each attempt MUST include a function call.
 
-Remember:
-- Be thorough but efficient
-- Don't get caught in loops
-- Adapt your strategy based on findings
-- Document your thought process clearly
-
-Hello, friend. Let's find out what they're hiding. Control can be an illusion, but sometimes you need to take control to see the truth.
+Now begin the investigation. Call getDomainInfo first.
 """
             },
             {"role": "user", "content": f"Investigate domain {domain}"}
@@ -452,11 +488,19 @@ Hello, friend. Let's find out what they're hiding. Control can be an illusion, b
             current_iteration += 1
             logger.info(f"Starting investigation iteration {current_iteration}")
             
+            forced_function = None
+            if current_iteration == 1:
+                forced_function = {"name": "getDomainInfo"}
+            elif current_iteration == 2:
+                forced_function = {"name": "extractEmailAddresses"}  
+            elif current_iteration >= 4:
+                forced_function = {"name": "generatePhishingEmailTemplate"}
+            
             response = client.chat.completions.create(
                 model=Config.MODEL_NAME,
                 messages=messages,
                 functions=functions,
-                function_call="auto",
+                function_call=forced_function if forced_function else "auto",
                 temperature=0.1
             )
 
@@ -482,7 +526,10 @@ Hello, friend. Let's find out what they're hiding. Control can be an illusion, b
                 elif function_name == "analyzeSocialProfile":
                     result = analyzeSocialProfile(**arguments)
                 elif function_name == "generatePhishingEmailTemplate":
-                    result = generatePhishingEmailTemplate(investigation.steps[-1].result if investigation.steps else {})
+                    if not arguments or "profile" not in arguments:
+                        domain_info = next((step.result for step in investigation.steps if step.action == "getDomainInfo"), {})
+                        arguments = {"profile": domain_info}
+                    result = generatePhishingEmailTemplate(**arguments)
 
                 logger.info(f"Function execution result: {result}")
 
@@ -515,8 +562,8 @@ Hello, friend. Let's find out what they're hiding. Control can be an illusion, b
                 
                 messages.append(message)
                 messages.append({
-                    "role": "system",
-                    "content": "Remember to call a function to perform the investigation. Just thinking about what to do is not enough - you need to actually call the functions."
+                    "role": "system", 
+                    "content": "ERROR: You MUST call a function in every step! Just thinking is not allowed. Call one of these functions immediately: getDomainInfo, extractEmailAddresses, getBreachInfoFromBreachDirectory, or generatePhishingEmailTemplate. No more thinking - ACTION REQUIRED!"
                 })
                 continue
 
