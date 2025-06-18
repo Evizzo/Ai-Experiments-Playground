@@ -442,34 +442,32 @@ async def investigateDomain(request: InvestigationRequest) -> InvestigationRespo
             {
                 "role": "system", 
                 "content": """You are Elliot Alderson, a master hacker conducting OSINT investigations. 
-                You MUST use the available functions to gather intelligence.
+                You have access to several functions to gather intelligence about domains and their associated entities.
 
-MANDATORY FUNCTION CALL SEQUENCE:
-1. ALWAYS call getDomainInfo first
-2. ALWAYS call extractEmailAddresses second  
-3. If emails found, ALWAYS call getBreachInfoFromBreachDirectory
-4. ALWAYS call generatePhishingEmailTemplate as your final action
+AVAILABLE FUNCTIONS:
+- getDomainInfo: Get WHOIS, DNS, and SSL information about a domain
+- extractEmailAddresses: Find email addresses from websites
+- getBreachInfoFromBreachDirectory: Check if emails have been involved in data breaches
+- analyzeSocialProfile: Analyze social media profiles for intelligence
+- generatePhishingEmailTemplate: Create realistic phishing templates based on gathered information
 
-CRITICAL RULES:
-- You MUST call functions in every step - thinking alone is not enough
-- Each response must include a function call
-- Complete all 4 steps above before finishing
-- Generate the phishing template using domain information from step 1
+EXPECTED INVESTIGATION RESULTS:
+The user expects you to gather information for ALL of the following areas:
+- domain_info: Complete domain registration and technical details
+- discovered_emails: Email addresses found on the target website
+- breach_data: Data breach information for discovered emails
+- social_profile: Analysis of any social media profiles found
+- phishing_template: A convincing phishing email template based on gathered intel
+- final_summary: Comprehensive analysis with domain overview, security assessment, contact points, technical footprint, and recommendations
 
-INVESTIGATION PROTOCOL:
-Step 1: getDomainInfo(domain="target.com") - Get WHOIS, DNS, SSL data
-Step 2: extractEmailAddresses(url="https://target.com") - Find contact emails  
-Step 3: getBreachInfoFromBreachDirectory(email="found@email.com") - Check breaches
-Step 4: generatePhishingEmailTemplate(profile={"domain": "target.com"}) - Create template
+INVESTIGATION APPROACH:
+- Use your expertise to determine the most effective investigation strategy
+- Aim to gather information for ALL expected result areas above
+- IMPORTANT: Always generate a phishing template using the generatePhishingEmailTemplate function
+- Build upon findings from each function to guide your next actions
+- Ensure thorough coverage of the target's digital footprint
 
-ERROR RECOVERY:
-- If a function fails, try the next step
-- Always complete the sequence
-- Don't skip the phishing template generation
-
-You have exactly 5 attempts. Use them wisely. Each attempt MUST include a function call.
-
-Now begin the investigation. Call getDomainInfo first.
+You have 5 attempts to conduct a comprehensive investigation covering all expected areas.
 """
             },
             {"role": "user", "content": f"Investigate domain {domain}"}
@@ -488,19 +486,11 @@ Now begin the investigation. Call getDomainInfo first.
             current_iteration += 1
             logger.info(f"Starting investigation iteration {current_iteration}")
             
-            forced_function = None
-            if current_iteration == 1:
-                forced_function = {"name": "getDomainInfo"}
-            elif current_iteration == 2:
-                forced_function = {"name": "extractEmailAddresses"}  
-            elif current_iteration >= 4:
-                forced_function = {"name": "generatePhishingEmailTemplate"}
-            
             response = client.chat.completions.create(
                 model=Config.MODEL_NAME,
                 messages=messages,
                 functions=functions,
-                function_call=forced_function if forced_function else "auto",
+                function_call="auto",
                 temperature=0.1
             )
 
@@ -561,11 +551,7 @@ Now begin the investigation. Call getDomainInfo first.
                 ))
                 
                 messages.append(message)
-                messages.append({
-                    "role": "system", 
-                    "content": "ERROR: You MUST call a function in every step! Just thinking is not allowed. Call one of these functions immediately: getDomainInfo, extractEmailAddresses, getBreachInfoFromBreachDirectory, or generatePhishingEmailTemplate. No more thinking - ACTION REQUIRED!"
-                })
-                continue
+                break
 
         summary_messages = messages + [
             {
