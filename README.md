@@ -7,6 +7,12 @@
 
 ---
 
+### 📁 **Gemma3 270M** – Local AI Model Training & Chat (WIP)
+
+🚀 A local AI training environment for Google's Gemma3 270M model, optimized for Apple Silicon MacBooks. Features interactive chat capabilities, LoRA fine-tuning scripts, and MLX framework integration for efficient training on M-series chips. Currently in development with setup automation and performance monitoring tools.
+
+---
+
 ### 📁 **aiOsint** – AI-Powered OSINT Investigation Tool
 
 🤖 An autonomous OSINT investigation system powered by ChatGPT that:
