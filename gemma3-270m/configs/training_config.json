@@ -1,0 +1,67 @@
+{
+    "model": {
+        "name": "gemma3-270m",
+        "path": "./models",
+        "max_length": 4096,
+        "vocab_size": 256000
+    },
+    "training": {
+        "batch_size": 128,
+        "gradient_accumulation_steps": 16,
+        "effective_batch_size": 2048,
+        "learning_rate": 1e-4,
+        "warmup_steps": 1000,
+        "max_steps": 50000,
+        "save_steps": 5000,
+        "eval_steps": 1000,
+        "logging_steps": 100,
+        "max_grad_norm": 1.0,
+        "weight_decay": 0.01,
+        "lr_scheduler_type": "cosine",
+        "num_train_epochs": 3
+    },
+    "lora": {
+        "enabled": true,
+        "rank": 8,
+        "alpha": 16,
+        "dropout": 0.1,
+        "target_modules": ["q_proj", "v_proj", "k_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+    },
+    "data": {
+        "train_file": "./data/train.jsonl",
+        "validation_file": "./data/validation.jsonl",
+        "test_file": "./data/test.jsonl",
+        "text_column": "text",
+        "label_column": "label",
+        "max_seq_length": 2048,
+        "streaming": true,
+        "shuffle_buffer_size": 10000
+    },
+    "optimization": {
+        "mixed_precision": "bf16",
+        "gradient_checkpointing": true,
+        "dataloader_num_workers": 4,
+        "dataloader_pin_memory": false
+    },
+    "evaluation": {
+        "metrics": ["accuracy", "f1", "precision", "recall"],
+        "mteb_tasks": ["sentence-similarity", "text-classification"],
+        "eval_batch_size": 64
+    },
+    "output": {
+        "output_dir": "./outputs",
+        "save_total_limit": 3,
+        "overwrite_output_dir": true,
+        "push_to_hub": false
+    },
+    "logging": {
+        "log_level": "info",
+        "log_file": "./logs/training.log",
+        "tensorboard_log_dir": "./logs/tensorboard"
+    },
+    "hardware": {
+        "device": "auto",
+        "max_memory": "14GB",
+        "num_gpus": 1
+    }
+}
