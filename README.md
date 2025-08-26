@@ -13,9 +13,9 @@
 
 ---
 
-### 📁 **aiOsint** – AI-Powered OSINT Investigation Tool
+### 📁 **aiAgentSecurtyResearch** – AI-Powered Security Investigation Tool
 
-🤖 An autonomous OSINT investigation system powered by ChatGPT that:
+🤖 An autonomous security investigation system powered by ChatGPT that:
 - Uses function/tool calling, makes intelligent decisions about which tools to use
 - Maintains a chain of thought during investigations
 - Adapts its investigation strategy based on findings
