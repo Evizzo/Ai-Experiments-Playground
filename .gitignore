@@ -9,6 +9,8 @@ venv/
 .venv/
 */venv/
 */.venv/
+venv_new/
+*/venv_new/
 
 # macOS system files
 .DS_Store
@@ -56,17 +58,28 @@ models/
 *.pkl
 *.pickle
 
-# Data directories
-data/
-*/data/
-input/
-*/input/
+# Training outputs and logs
 outputs/
 */outputs/
 logs/
 */logs/
 checkpoints/
 */checkpoints/
+
+# Training data (keep structure, ignore content)
+data/
+*/data/
+input/
+*/input/
+
+# Keep model configs but ignore large model files
+!*/models/config.json
+!*/models/tokenizer.json
+!*/models/tokenizer_config.json
+!*/models/generation_config.json
+!*/models/special_tokens_map.json
+!*/models/added_tokens.json
+!*/models/README.md
 
 # IDE and editor files
 .idea/
@@ -129,3 +142,16 @@ neo4j/import/
 *.temp
 *.bak
 *.backup
+
+# MLX and training specific
+*.mlx
+*.mlxmodel
+training_*.log
+evaluation_results_*.json
+wandb/
+tensorboard_logs/
+*.ckpt
+checkpoint-*/
+
+# Keep evaluation results structure but ignore large files
+!logs/evaluation_results_*.json
