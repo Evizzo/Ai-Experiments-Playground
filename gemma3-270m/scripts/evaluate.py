@@ -12,9 +12,7 @@ from pathlib import Path
 from typing import Dict, Any, List
 import time
 
-import mlx.core as mx
-from mteb import MTEB
-from mteb.tasks import SentenceSimilarity, TextClassification
+from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator, BinaryClassificationEvaluator
 import numpy as np
 
 def setupLogging(logLevel: str = "INFO"):
@@ -100,12 +98,12 @@ class GemmaEvaluator:
         
         return np.array(embeddings)
     
-    def runMTEBEvaluation(self, tasks: List[str] = None) -> Dict[str, Any]:
-        """Run MTEB evaluation on specified tasks."""
+    def runEvaluation(self, tasks: List[str] = None) -> Dict[str, Any]:
+        """Run evaluation on specified tasks."""
         if tasks is None:
             tasks = self.config['evaluation']['mteb_tasks']
         
-        self.logger.info(f"📊 Running MTEB evaluation on tasks: {tasks}")
+        self.logger.info(f"📊 Running evaluation on tasks: {tasks}")
         
         results = {}
         
@@ -122,15 +120,15 @@ class GemmaEvaluator:
         return results
     
     def evaluateTask(self, taskName: str) -> Dict[str, Any]:
-        """Evaluate a specific MTEB task."""
+        """Evaluate a specific task."""
         if taskName == "sentence-similarity":
-            return self.evaluateSentenceSimilarity()
+            return self.evaluateEmbeddingSimilarity()
         elif taskName == "text-classification":
-            return self.evaluateTextClassification()
+            return self.evaluateBinaryClassification()
         else:
             raise ValueError(f"Unknown task: {taskName}")
     
-    def evaluateSentenceSimilarity(self) -> Dict[str, Any]:
+    def evaluateEmbeddingSimilarity(self) -> Dict[str, Any]:
         """Evaluate sentence similarity task."""
         # Create sample data for evaluation
         sentences = [
@@ -161,7 +159,7 @@ class GemmaEvaluator:
             "embeddings_shape": embeddings.shape
         }
     
-    def evaluateTextClassification(self) -> Dict[str, Any]:
+    def evaluateBinaryClassification(self) -> Dict[str, Any]:
         """Evaluate text classification task."""
         # Create sample classification data
         texts = [
@@ -254,10 +252,10 @@ class GemmaEvaluator:
         return outputPath
 
 def main():
-    parser = argparse.ArgumentParser(description="Evaluate Gemma3 270M model using MTEB")
+    parser = argparse.ArgumentParser(description="Evaluate Gemma3 270M model")
     parser.add_argument("--model-path", required=True, help="Path to the trained model")
     parser.add_argument("--config", help="Path to evaluation config file")
-    parser.add_argument("--tasks", nargs="+", help="Specific MTEB tasks to evaluate")
+    parser.add_argument("--tasks", nargs="+", help="Specific tasks to evaluate")
     parser.add_argument("--output", help="Output path for results")
     
     args = parser.parse_args()
@@ -268,9 +266,9 @@ def main():
         
         # Run evaluation
         if args.tasks:
-            results = evaluator.runMTEBEvaluation(args.tasks)
+            results = evaluator.runEvaluation(args.tasks)
         else:
-            results = evaluator.runMTEBEvaluation()
+            results = evaluator.runEvaluation()
         
         # Generate and display report
         report = evaluator.generateReport(results)

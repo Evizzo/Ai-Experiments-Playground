@@ -13,7 +13,7 @@ def testModelLoading():
     
     try:
         from transformers import AutoTokenizer, AutoModelForCausalLM
-        import mlx.core as mx
+        import torch
         
         print("✅ Dependencies imported successfully")
         
